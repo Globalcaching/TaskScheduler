@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<files>
+  <file description="Gemeenten-NL" path="gemeentegrenzen2014c.shp" tablename="GEMEENTE" level="Municipality" format="DutchGrid" email="" website="" id="NLGEMEENTE"/>
+  <file description="Provincie-NL" path="provinciegrenzen2013.shp" tablename="PROVNAAM" level="State" format="DutchGrid" email="" website="" id="NLPROV"/>
+</files>
