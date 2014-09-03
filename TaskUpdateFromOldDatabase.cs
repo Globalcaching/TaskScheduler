@@ -1,0 +1,168 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using TaskScheduler.Models;
+
+namespace TaskScheduler
+{
+    public class TaskUpdateFromOldDatabase: TaskBase
+    {
+        private int _wpCount;
+
+        public TaskUpdateFromOldDatabase(Manager taskManager) :
+            base(taskManager, typeof(TaskUpdateFromOldDatabase), "Update from old database", 0, 0, 20)
+        {
+            _wpCount = 0;
+            Details = _wpCount.ToString();
+        }
+
+        protected override void ServiceMethod()
+        {
+            try
+            {
+                ///CCC users
+                List<GCEuCCCUser> cccUsers = new List<GCEuCCCUser>();
+                using (var dbcon = new DBCon())
+                using (var dbcon2 = new DBCon())
+                {
+                    var dr = dbcon.ExecuteReader("select * from CCCUsers with (nolock)");
+                    while (dr.Read())
+                    {
+                        GCEuCCCUser usr = new GCEuCCCUser();
+                        usr.Active = (bool)dr["Active"];
+                        usr.Comment = (string)dr["Comment"];
+                        usr.HideEmailAddress = (bool)dr["HideEmailAddress"];
+                        usr.ModifiedAt = DateTime.Parse(dr["ModifiedAt"] as string);
+                        usr.PreferSMS = (bool)dr["PreferSMS"];
+                        usr.RegisteredAt = DateTime.Parse(dr["RegisteredAt"] as string);
+                        usr.SMS = (bool)dr["SMS"];
+                        usr.Telnr = (string)dr["Telnr"];
+                        usr.TwitterUsername = (string)dr["TwitterUsername"];
+                        usr.UserID = (int)dr["UserID"];
+                        usr.UsersHelped = (int)dr["UsersHelped"];
+
+                        object o = dbcon2.ExecuteScalar(string.Format("select top 1 UserID from GCCOMUsers where Username='{0}'", dr["gccomName"].ToString().Replace("'", "''")));
+                        if (o != null)
+                        {
+                            usr.GCComUserID = (int)o;
+                            cccUsers.Add(usr);
+                        }
+                    }
+                }
+                if (_stop) return;
+                using (var db = GCEuDataSupport.Instance.GetGCEuDataDatabase())
+                {
+                    List<GCEuCCCUser> updateCCCUsers = db.Fetch<GCEuCCCUser>("");
+                    foreach (var cusr in cccUsers)
+                    {
+                        var updUsr = updateCCCUsers.FirstOrDefault(x => x.UserID == cusr.UserID);
+                        if (updUsr == null)
+                        {
+                            db.Insert(cusr);
+                        }
+                        else
+                        {
+                            db.Update("GCEuCCCUser", "UserID", cusr);
+                            updateCCCUsers.Remove(updUsr);
+                        }
+                    }
+
+                    foreach (var cusr in updateCCCUsers)
+                    {
+                        db.Execute("delete from GCEuCCCUser where UserID=@0", cusr.UserID);
+                    }
+                }
+
+
+                //geocaches, FTF, City atec.
+                using (var db = GCComDataSupport.Instance.GetGCComDataDatabase())
+                {
+                    List<GCEuGeocache> gcEUCaches = db.SkipTake<GCEuGeocache>(0, 30000,
+                        PetaPoco.Sql.Builder.Select("GCEuGeocache.*")
+                        .From("GCComGeocache")
+                        .InnerJoin(string.Format("[{0}].[dbo].[GCEuGeocache]", GCEuDataSupport.GlobalcachingDatabaseName)).On("GCComGeocache.ID = GCEuGeocache.ID")
+                        .Where("CountryID=141")
+                        .Append("AND (Municipality=NULL OR City=NULL OR DistanceChecked=0 OR FTFCompleted=0)")
+                        );
+
+                    if (gcEUCaches.Count > 0)
+                    {
+                        using (var dbcon = new DBCon())
+                        {
+                            foreach (var gc in gcEUCaches)
+                            {
+                                if (_stop)
+                                {
+                                    break;
+                                }
+
+                                string wp = db.ExecuteScalar<string>("select Code from GCComGeocache where ID=@0", gc.ID);
+                                var dr = dbcon.ExecuteReader(string.Format("select City, County, FTFUsername, STFUsername, TTFUsername, Afstand, AfstandChecked from Caches where Waypoint='{0}'", wp));
+                                if (dr.Read())
+                                {
+                                    gc.City = dr["City"] as string ?? "";
+                                    gc.Municipality = dr["County"] as string ?? "";
+
+                                    bool? distChecked = dr["AfstandChecked"] == DBNull.Value ? null : (bool?)dr["AfstandChecked"];
+                                    double? dist = dr["Afstand"] == DBNull.Value ? null : (double?)dr["Afstand"];
+                                    gc.DistanceChecked = (distChecked == true || dist != null);
+                                    if (dist != null)
+                                    {
+                                        gc.Distance = (double)dist;
+                                    }
+
+                                    string usrn1 = dr["FTFUsername"] as string;
+                                    string usrn2 = dr["STFUsername"] as string;
+                                    string usrn3 = dr["TTFUsername"] as string;
+                                    if (gc.FTFUserID == null && !string.IsNullOrEmpty(usrn1))
+                                    {
+                                        dr = dbcon.ExecuteReader(string.Format("select top 1 * from UserLogs where Username='{0}' and Waypoint='{1}' and found=1 order by Logdate", usrn1, wp));
+                                        if (dr.Read())
+                                        {
+                                            gc.FTFUserID = (int)dr["GCComUserID"];
+                                            gc.FTFAtDate = DateTime.Parse(dr["Logdate"] as string);
+                                        }
+                                    }
+                                    if (gc.STFUserID == null && !string.IsNullOrEmpty(usrn2))
+                                    {
+                                        dr = dbcon.ExecuteReader(string.Format("select top 1 * from UserLogs where Username='{0}' and Waypoint='{1}' and found=1 order by Logdate", usrn2, wp));
+                                        if (dr.Read())
+                                        {
+                                            gc.STFUserID = (int)dr["GCComUserID"];
+                                            gc.STFAtDate = DateTime.Parse(dr["Logdate"] as string);
+                                        }
+                                    }
+                                    if (gc.TTFUserID == null && !string.IsNullOrEmpty(usrn3))
+                                    {
+                                        dr = dbcon.ExecuteReader(string.Format("select top 1 * from UserLogs where Username='{0}' and Waypoint='{1}' and found=1 order by Logdate", usrn3, wp));
+                                        if (dr.Read())
+                                        {
+                                            gc.TTFUserID = (int)dr["GCComUserID"];
+                                            gc.TTFAtDate = DateTime.Parse(dr["Logdate"] as string);
+                                        }
+                                    }
+                                    gc.FTFCompleted = (usrn1 != null && usrn2 != null && usrn3!=null);
+
+                                    db.Update(string.Format("[{0}].[dbo].[GCEuGeocache]", GCEuDataSupport.GlobalcachingDatabaseName), "ID", gc);
+
+                                    _wpCount++;
+                                    Details = _wpCount.ToString();
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Details = "Up to date!";
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Details = e.Message;
+            }
+        }
+    }
+}

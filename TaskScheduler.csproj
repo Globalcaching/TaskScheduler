@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E6D2018E-A7DF-4F51-96A8-F5772B974041}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TaskScheduler</RootNamespace>
+    <AssemblyName>TaskScheduler</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DataSupport.cs" />
+    <Compile Include="DBCon.cs" />
+    <Compile Include="DotNetDBF\DBFBase.cs" />
+    <Compile Include="DotNetDBF\DBFException.cs" />
+    <Compile Include="DotNetDBF\DBFField.cs" />
+    <Compile Include="DotNetDBF\DBFFieldType.cs" />
+    <Compile Include="DotNetDBF\DBFHeader.cs" />
+    <Compile Include="DotNetDBF\DBFReader.cs" />
+    <Compile Include="DotNetDBF\DBFWriter.cs" />
+    <Compile Include="DotNetDBF\DBTHeader.cs" />
+    <Compile Include="DotNetDBF\MemoValue.cs" />
+    <Compile Include="DotNetDBF\Utils.cs" />
+    <Compile Include="FormMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormMain.Designer.cs">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GcComAccounts.cs" />
+    <Compile Include="GCComDataSupport.cs" />
+    <Compile Include="GCEuDataSupport.cs" />
+    <Compile Include="GeocachingAPI.cs" />
+    <Compile Include="Helper.cs" />
+    <Compile Include="LatLon.cs" />
+    <Compile Include="LatLonPolygon.cs" />
+    <Compile Include="Live.cs" />
+    <Compile Include="Manager.cs" />
+    <Compile Include="Models\GCComAttributeType.cs" />
+    <Compile Include="Models\GCComDataAdditionalWaypoints.cs" />
+    <Compile Include="Models\GCComGeocache.cs" />
+    <Compile Include="Models\GCComGeocacheAttribute.cs" />
+    <Compile Include="Models\GCComGeocacheImage.cs" />
+    <Compile Include="Models\GCComGeocacheLog.cs" />
+    <Compile Include="Models\GCComGeocacheLogImage.cs" />
+    <Compile Include="Models\GCComGeocacheType.cs" />
+    <Compile Include="Models\GCComLogType.cs" />
+    <Compile Include="Models\GCComUser.cs" />
+    <Compile Include="Models\GCEuCCCUser.cs" />
+    <Compile Include="Models\GCEuComUserNameChange.cs" />
+    <Compile Include="Models\GCEuGeocache.cs" />
+    <Compile Include="PetaPoco.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScheduledWaypoint.cs" />
+    <Compile Include="SchedulerStatus.cs" />
+    <Compile Include="ServiceInfo.cs" />
+    <Compile Include="SharpZipLib\Checksums\Adler32.cs" />
+    <Compile Include="SharpZipLib\Checksums\CRC32.cs" />
+    <Compile Include="SharpZipLib\Checksums\IChecksum.cs" />
+    <Compile Include="SharpZipLib\Checksums\StrangeCRC.cs" />
+    <Compile Include="SharpZipLib\Compression\Deflater.cs" />
+    <Compile Include="SharpZipLib\Compression\DeflaterConstants.cs" />
+    <Compile Include="SharpZipLib\Compression\DeflaterEngine.cs" />
+    <Compile Include="SharpZipLib\Compression\DeflaterHuffman.cs" />
+    <Compile Include="SharpZipLib\Compression\DeflaterPending.cs" />
+    <Compile Include="SharpZipLib\Compression\Inflater.cs" />
+    <Compile Include="SharpZipLib\Compression\InflaterDynHeader.cs" />
+    <Compile Include="SharpZipLib\Compression\InflaterHuffmanTree.cs" />
+    <Compile Include="SharpZipLib\Compression\PendingBuffer.cs" />
+    <Compile Include="SharpZipLib\Compression\Streams\DeflaterOutputStream.cs" />
+    <Compile Include="SharpZipLib\Compression\Streams\InflaterInputStream.cs" />
+    <Compile Include="SharpZipLib\Compression\Streams\OutputWindow.cs" />
+    <Compile Include="SharpZipLib\Compression\Streams\StreamManipulator.cs" />
+    <Compile Include="SharpZipLib\Core\FileSystemScanner.cs" />
+    <Compile Include="SharpZipLib\Core\INameTransform.cs" />
+    <Compile Include="SharpZipLib\Core\IScanFilter.cs" />
+    <Compile Include="SharpZipLib\Core\NameFilter.cs" />
+    <Compile Include="SharpZipLib\Core\PathFilter.cs" />
+    <Compile Include="SharpZipLib\Core\StreamUtils.cs" />
+    <Compile Include="SharpZipLib\Core\WindowsPathUtils.cs" />
+    <Compile Include="SharpZipLib\Encryption\PkzipClassic.cs" />
+    <Compile Include="SharpZipLib\FastZip.cs" />
+    <Compile Include="SharpZipLib\IEntryFactory.cs" />
+    <Compile Include="SharpZipLib\SharpZipBaseException.cs" />
+    <Compile Include="SharpZipLib\WindowsNameTransform.cs" />
+    <Compile Include="SharpZipLib\ZipConstants.cs" />
+    <Compile Include="SharpZipLib\ZipEntry.cs" />
+    <Compile Include="SharpZipLib\ZipEntryFactory.cs" />
+    <Compile Include="SharpZipLib\ZipException.cs" />
+    <Compile Include="SharpZipLib\ZipExtraData.cs" />
+    <Compile Include="SharpZipLib\ZipFile.cs" />
+    <Compile Include="SharpZipLib\ZipHelperStream.cs" />
+    <Compile Include="SharpZipLib\ZipInputStream.cs" />
+    <Compile Include="SharpZipLib\ZipNameTransform.cs" />
+    <Compile Include="SharpZipLib\ZipOutputStream.cs" />
+    <Compile Include="SHP\AreaInfo.cs" />
+    <Compile Include="SHP\AreaType.cs" />
+    <Compile Include="SHP\ShapeFile.cs" />
+    <Compile Include="SHP\ShapeFilesManager.cs" />
+    <Compile Include="TaskBase.cs" />
+    <Compile Include="TaskDevelopment.cs" />
+    <Compile Include="TaskMostRecentLogs.cs" />
+    <Compile Include="TaskPocketQuery.cs" />
+    <Compile Include="TaskSettingsBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TaskSettingsBase.Designer.cs">
+      <DependentUpon>TaskSettingsBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TaskUpdateFromOldDatabase.cs" />
+    <Compile Include="TaskUpdateLogs.cs" />
+    <Compile Include="TaskUpdateStatus.cs" />
+    <Compile Include="TaskWalkWaypoints.cs" />
+    <EmbeddedResource Include="FormMain.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="TaskSettingsBase.resx">
+      <DependentUpon>TaskSettingsBase.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
