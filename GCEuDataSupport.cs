@@ -71,11 +71,11 @@ namespace TaskScheduler
             }
         }
 
-        public void SetFoundCountForGeocache(long geocacheId, int incrementValue)
+        public void SetFoundCountForGeocache(long geocacheId, int FavoriteCount, int incrementValue)
         {
-            SetFoundCountForGeocache(geocacheId, incrementValue, null);
+            SetFoundCountForGeocache(geocacheId, FavoriteCount, incrementValue, null);
         }
-        public void SetFoundCountForGeocache(long geocacheId, int incrementValue, DateTime? publishedDate)
+        public void SetFoundCountForGeocache(long geocacheId, int FavoriteCount, int incrementValue, DateTime? publishedDate)
         {
             using (PetaPoco.Database db = GetGCEuDataDatabase())
             {
@@ -87,14 +87,16 @@ namespace TaskScheduler
                 {
                     db.Execute("update GCEuGeocache set FoundCount = @0, PublishedAtDate=@1 where ID=@2", incrementValue, (DateTime)publishedDate, geocacheId);
                 }
+                db.Execute("update GCEuGeocache set FavPer100Found = CASE WHEN FoundCount=0 THEN 0 ELSE 100*CONVERT(FLOAT,@0)/CONVERT(FLOAT,FoundCount) END where ID=@1", FavoriteCount, geocacheId);
             }
         }
 
-        public void AddFoundCountForGeocache(long geocacheId, int incrementValue)
+        public void AddFoundCountForGeocache(long geocacheId, int FavoriteCount, int incrementValue)
         {
             using (PetaPoco.Database db = GetGCEuDataDatabase())
             {
                 db.Execute("update GCEuGeocache set FoundCount = FoundCount + @0 where ID=@1", incrementValue, geocacheId);
+                db.Execute("update GCEuGeocache set FavPer100Found = CASE WHEN FoundCount=0 THEN 0 ELSE 100*CONVERT(FLOAT,@0)/CONVERT(FLOAT,FoundCount) END where ID=@1", FavoriteCount, geocacheId);
             }
         }
 

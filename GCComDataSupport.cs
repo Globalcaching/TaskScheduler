@@ -262,6 +262,12 @@ namespace TaskScheduler
                     AddMember(db, l.Finder);
                 }
             }
+            int favPoints = 0;
+            var fpl = db.Fetch<int?>("SELECT FavoritePoints FROM GCComGeocache WHERE ID=@0", geocacheId);
+            if (fpl != null && fpl.Count > 0)
+            {
+                favPoints = fpl[0] ?? 0;
+            }
             if (checkRemoved)
             {
                 var ids = db.Fetch<long>("SELECT ID FROM GCComGeocacheLog WHERE GeocacheID=@0", geocacheId);
@@ -272,13 +278,13 @@ namespace TaskScheduler
                         db.Execute("delete from GCComGeocacheLog where ID=@0", l);
                     }
                 }
-                GCEuDataSupport.Instance.SetFoundCountForGeocache(geocacheId, foundCount, publishedDate);
+                GCEuDataSupport.Instance.SetFoundCountForGeocache(geocacheId, favPoints, foundCount, publishedDate);
             }
             else
             {
                 if (incFoundCount > 0)
                 {
-                    GCEuDataSupport.Instance.AddFoundCountForGeocache(geocacheId, incFoundCount);
+                    GCEuDataSupport.Instance.AddFoundCountForGeocache(geocacheId, favPoints, incFoundCount);
                 }
             }
         }
