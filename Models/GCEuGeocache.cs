@@ -24,6 +24,9 @@ namespace TaskScheduler.Models
         public DateTime? STFAtDate { get; set; }
         public DateTime? TTFAtDate { get; set; }
         public DateTime? PublishedAtDate { get; set; }
+        public double? FavPer100Found { get; set; }
+        public int? LogImageCount { get; set; }
+        public double? LogImagePer100Found { get; set; }
         
         public static GCEuGeocache From(Geocache src)
         {
@@ -36,6 +39,7 @@ namespace TaskScheduler.Models
             result.Municipality = null;
             result.City = null;
             result.FoundCount = 0;
+            result.LogImageCount = 0;
             result.Distance = null;
             result.DistanceChecked = false;
             result.FTFCompleted = false;
@@ -43,6 +47,8 @@ namespace TaskScheduler.Models
             result.STFAtDate = null;
             result.TTFAtDate = null;
             result.PublishedAtDate = null;
+            result.FavPer100Found = null;
+            result.LogImagePer100Found = null;
             return result;
         }
     }

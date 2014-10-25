@@ -237,6 +237,8 @@ namespace TaskScheduler
             int foundCount = 0;
             int incFoundCount = 0;
             DateTime? publishedDate = null;
+            List<long> currentLogIds = db.Fetch<long>("select ID from GCComGeocacheLog with (nolock) where GeocacheID=@0", geocacheId);
+            List<string> currentLogImageIds = db.Fetch<string>("select GCComGeocacheLogImage.Url from GCComGeocacheLogImage with (nolock) inner join GCComGeocacheLog with (nolock) on GCComGeocacheLogImage.LogID = GCComGeocacheLog.ID where GCComGeocacheLog.GeocacheID=@0", geocacheId);
             foreach (var l in logs)
             {
                 if (l.LogType != null)
@@ -252,7 +254,7 @@ namespace TaskScheduler
                 }
                 if (l.UTCCreateDate >= updateOnlyAfter || l.VisitDate >= updateOnlyAfter)
                 {
-                    if (AddLog(db, geocacheId, l))
+                    if (AddLog(db, geocacheId, l, currentLogIds, currentLogImageIds))
                     {
                         incFoundCount++;
                     }
@@ -263,11 +265,13 @@ namespace TaskScheduler
                 }
             }
             int favPoints = 0;
+            int logImgCount = 0;
             var fpl = db.Fetch<int?>("SELECT FavoritePoints FROM GCComGeocache WHERE ID=@0", geocacheId);
             if (fpl != null && fpl.Count > 0)
             {
                 favPoints = fpl[0] ?? 0;
             }
+            logImgCount = currentLogImageIds.Count;
             if (checkRemoved)
             {
                 var ids = db.Fetch<long>("SELECT ID FROM GCComGeocacheLog WHERE GeocacheID=@0", geocacheId);
@@ -278,22 +282,31 @@ namespace TaskScheduler
                         db.Execute("delete from GCComGeocacheLog where ID=@0", l);
                     }
                 }
-                GCEuDataSupport.Instance.SetFoundCountForGeocache(geocacheId, favPoints, foundCount, publishedDate);
+                GCEuDataSupport.Instance.SetFoundCountForGeocache(geocacheId, favPoints, logImgCount, foundCount, publishedDate);
             }
             else
             {
                 if (incFoundCount > 0)
                 {
-                    GCEuDataSupport.Instance.AddFoundCountForGeocache(geocacheId, favPoints, incFoundCount);
+                    GCEuDataSupport.Instance.AddFoundCountForGeocache(geocacheId, favPoints, logImgCount, incFoundCount);
                 }
             }
         }
 
-        private bool AddLog(PetaPoco.Database db, long geocacheId, GeocacheLog log)
+        private bool AddLog(PetaPoco.Database db, long geocacheId, GeocacheLog log, List<long> currentLogIds, List<string> currentLogImageIds)
         {
             bool result = false;
             var gcData = GCComGeocacheLog.From(geocacheId, log);
-            if (db.Fetch<long>("SELECT ID FROM GCComGeocacheLog WHERE ID=@0", gcData.ID).Count == 0)
+            bool logIsNew;
+            if (currentLogIds != null)
+            {
+                logIsNew = !currentLogIds.Contains(gcData.ID);
+            }
+            else
+            {
+                logIsNew = db.Fetch<long>("SELECT ID FROM GCComGeocacheLog WHERE ID=@0", gcData.ID).Count == 0;
+            }
+            if (logIsNew)
             {
                 db.Insert(gcData);
                 if (log.LogType != null)
@@ -310,7 +323,7 @@ namespace TaskScheduler
             }
             if (log.Images != null)
             {
-                AddGeocacheLogImages(db, gcData.ID, log.Images);
+                AddGeocacheLogImages(db, gcData.ID, log.Images, currentLogImageIds);
             }
             if (log.Finder != null)
             {
@@ -319,17 +332,26 @@ namespace TaskScheduler
             return result;
         }
 
-        private void AddGeocacheLogImages(PetaPoco.Database db, long logId, ImageData[] imgs)
+        private void AddGeocacheLogImages(PetaPoco.Database db, long logId, ImageData[] imgs, List<string> currentLogImageIds)
         {
             foreach (var l in imgs)
             {
-                AddGeocacheLogImage(db, logId, l);
+                AddGeocacheLogImage(db, logId, l, currentLogImageIds);
             }
         }
-        private void AddGeocacheLogImage(PetaPoco.Database db, long logId, ImageData img)
+        private void AddGeocacheLogImage(PetaPoco.Database db, long logId, ImageData img, List<string> currentLogImageIds)
         {
             var gcData = GCComGeocacheLogImage.From(logId, img);
-            if (db.Fetch<string>("SELECT Url FROM GCComGeocacheLogImage WHERE Url=@0", gcData.Url).Count == 0)
+            bool isNewImage;
+            if (currentLogImageIds != null)
+            {
+                isNewImage = !currentLogImageIds.Contains(gcData.Url);
+            }
+            else
+            {
+                isNewImage = db.Fetch<string>("SELECT Url FROM GCComGeocacheLogImage WHERE Url=@0", gcData.Url).Count == 0;
+            }
+            if (isNewImage)
             {
                 db.Insert(gcData);
             }
