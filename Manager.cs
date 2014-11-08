@@ -39,6 +39,7 @@ namespace TaskScheduler
             Tasks.Add(new TaskUpdateLogs(this));
             Tasks.Add(new TaskPocketQuery(this));
             Tasks.Add(new TaskUpdateStatus(this));
+            Tasks.Add(new TaskUpdateFTFStats(this));
             Tasks.Add(new TaskUpdateFromOldDatabase(this));
             Tasks.Add(new TaskDevelopment(this));
             foreach (var t in Tasks)

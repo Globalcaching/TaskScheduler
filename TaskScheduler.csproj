@@ -87,6 +87,7 @@
     <Compile Include="Models\GCComUser.cs" />
     <Compile Include="Models\GCEuCCCUser.cs" />
     <Compile Include="Models\GCEuComUserNameChange.cs" />
+    <Compile Include="Models\GCEuFTFStats.cs" />
     <Compile Include="Models\GCEuGeocache.cs" />
     <Compile Include="PetaPoco.cs" />
     <Compile Include="Program.cs" />
@@ -148,6 +149,7 @@
       <DependentUpon>TaskSettingsBase.cs</DependentUpon>
     </Compile>
     <Compile Include="TaskUpdateFromOldDatabase.cs" />
+    <Compile Include="TaskUpdateFTFStats.cs" />
     <Compile Include="TaskUpdateLogs.cs" />
     <Compile Include="TaskUpdateStatus.cs" />
     <Compile Include="TaskWalkWaypoints.cs" />
