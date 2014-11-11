@@ -181,13 +181,13 @@ namespace TaskScheduler
                     || item.TTFCount != rec.TTFCount
                     )
                 {
-                    db.Execute(string.Format("update GCEuFTFStats set FTFCount=@0, STFCount=@1, TTFCount=@3, Position=@4, PositionPoints=@5 where UserID=@6 and {0}", jaarClause), 
-                        item.FTFCount,
-                        item.STFCount,
-                        item.TTFCount,
-                        item.Position,
-                        item.PositionPoints,
-                        item.UserID);
+                    db.Execute(string.Format("update GCEuFTFStats set FTFCount=@0, STFCount=@1, TTFCount=@3, Position=@4, PositionPoints=@5 where UserID=@6 and {0}", jaarClause),
+                        rec.FTFCount,
+                        rec.STFCount,
+                        rec.TTFCount,
+                        rec.Position,
+                        rec.PositionPoints,
+                        rec.UserID);
                 }
             }
             //insert
