@@ -22,12 +22,26 @@ namespace TaskScheduler
         {
             try
             {
+                List<long> parelCaches = new List<long>();
                 ///CCC users
                 List<GCEuCCCUser> cccUsers = new List<GCEuCCCUser>();
                 using (var dbcon = new DBCon())
                 using (var dbcon2 = new DBCon())
                 {
-                    var dr = dbcon.ExecuteReader("select * from CCCUsers with (nolock)");
+                    var dr = dbcon.ExecuteReader("select GCComGeocache.ID from GCComData.dbo.GCComGeocache inner join ParelVanDeMaand on GCComGeocache.Code COLLATE DATABASE_DEFAULT = ParelVanDeMaand.Waypoint COLLATE DATABASE_DEFAULT");
+                    while (dr.Read())
+                    {
+                        parelCaches.Add(dr.GetInt64(0));
+                    }
+                    foreach (var id in parelCaches)
+                    {
+                        if ((int)dbcon.ExecuteScalar(string.Format("select count(1) from GCEuData.dbo.GCEuParel where GeocacheID={0}", id)) == 0)
+                        {
+                            dbcon.ExecuteNonQuery(string.Format("insert into GCEuData.dbo.GCEuParel (GeocacheID) values ({0})", id));
+                        }
+                    }
+
+                    dr = dbcon.ExecuteReader("select * from CCCUsers with (nolock)");
                     while (dr.Read())
                     {
                         GCEuCCCUser usr = new GCEuCCCUser();
