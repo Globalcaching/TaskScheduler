@@ -27,6 +27,7 @@ namespace TaskScheduler.Models
         public double? FavPer100Found { get; set; }
         public int? LogImageCount { get; set; }
         public double? LogImagePer100Found { get; set; }
+        public int FTFFoundCount { get; set; }        
         
         public static GCEuGeocache From(Geocache src)
         {
@@ -49,6 +50,7 @@ namespace TaskScheduler.Models
             result.PublishedAtDate = null;
             result.FavPer100Found = null;
             result.LogImagePer100Found = null;
+            result.FTFFoundCount = 0;
             return result;
         }
     }
