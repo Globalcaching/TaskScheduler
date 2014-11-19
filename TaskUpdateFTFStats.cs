@@ -117,10 +117,12 @@ namespace TaskScheduler
                     }
                 }
                 Details = "OK";
+                ServiceInfo.ErrorInLastRun = false;
             }
             catch(Exception e)
             {
                 Details = e.Message;
+                ServiceInfo.ErrorInLastRun = true;
             }
         }
 

@@ -172,6 +172,20 @@ namespace TaskScheduler
                         result = resp.Geocaches[0];
                     }
                 }
+                if (resp.CacheLimits != null)
+                {
+                    var ac = Instance.GCComPMAccounts.Where(x => x.Token == token).FirstOrDefault();
+                    if (ac != null)
+                    {
+                        ac.CachesLeft = resp.CacheLimits.CachesLeft;
+                        ac.CurrentCacheCount = resp.CacheLimits.CurrentCacheCount;
+                        ac.LimitsUpdatedAt = DateTime.Now;
+                        using (var db = new PetaPoco.Database(Manager.SchedulerConnectionString, "System.Data.SqlClient"))
+                        {
+                            db.Save(ac);
+                        }
+                    }
+                }
             }
             catch
             {

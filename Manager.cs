@@ -9,9 +9,10 @@ namespace TaskScheduler
 {
     public class Manager: IDisposable
     {
-        public Database TaskSchedulerDatabase = null;
         private SchedulerStatus TaskSchedularStatus;
         public List<TaskBase> Tasks;
+        private int _wwwErrors = 0;
+        private int _apiErrors = 0;
 
         public static string SchedulerDatabase = "TaskScheduler_tst";
         public static string SchedulerConnectionString
@@ -24,31 +25,38 @@ namespace TaskScheduler
 
         public Manager()
         {
-            TaskSchedulerDatabase = new Database(SchedulerConnectionString, "System.Data.SqlClient");
-            TaskSchedularStatus = TaskSchedulerDatabase.SingleOrDefault<SchedulerStatus>("");
-            if (TaskSchedularStatus==null)
+            using (var db = TaskSchedulerDatabase)
             {
-                TaskSchedularStatus = new SchedulerStatus();
-                TaskSchedularStatus.GCComWWWError = false;
-                TaskSchedularStatus.LiveAPIError = false;
-                TaskSchedulerDatabase.Save(TaskSchedularStatus);
-            }
-            Tasks = new List<TaskBase>();
-            Tasks.Add(new TaskMostRecentLogs(this));
-            Tasks.Add(new TaskWalkWaypoints(this));
-            Tasks.Add(new TaskUpdateLogs(this));
-            Tasks.Add(new TaskPocketQuery(this));
-            Tasks.Add(new TaskUpdateStatus(this));
-            Tasks.Add(new TaskUpdateFTFStats(this));
-            Tasks.Add(new TaskUpdateFromOldDatabase(this));
-            Tasks.Add(new TaskDevelopment(this));
-            foreach (var t in Tasks)
-            {
-                if (t.ServiceInfo.Enabled)
+                TaskSchedularStatus = db.FirstOrDefault<SchedulerStatus>("");
+                if (TaskSchedularStatus == null)
                 {
-                    t.ServiceStart();
+                    TaskSchedularStatus = new SchedulerStatus();
+                    TaskSchedularStatus.GCComWWWError = false;
+                    TaskSchedularStatus.LiveAPIError = false;
+                    db.Save(TaskSchedularStatus);
+                }
+                Tasks = new List<TaskBase>();
+                Tasks.Add(new TaskMostRecentLogs(this));
+                Tasks.Add(new TaskWalkWaypoints(this));
+                Tasks.Add(new TaskUpdateLogs(this));
+                Tasks.Add(new TaskPocketQuery(this));
+                Tasks.Add(new TaskUpdateStatus(this));
+                Tasks.Add(new TaskUpdateFTFStats(this));
+                Tasks.Add(new TaskUpdateFromOldDatabase(this));
+                Tasks.Add(new TaskDevelopment(this));
+                foreach (var t in Tasks)
+                {
+                    if (t.ServiceInfo.Enabled)
+                    {
+                        t.ServiceStart();
+                    }
                 }
             }
+        }
+
+        public PetaPoco.Database TaskSchedulerDatabase
+        {
+            get { return new Database(SchedulerConnectionString, "System.Data.SqlClient"); }
         }
 
         public void Dispose()
@@ -57,28 +65,41 @@ namespace TaskScheduler
             {
                 t.ServiceStop();
             }
-            if (TaskSchedulerDatabase != null)
-            {
-                TaskSchedulerDatabase.Dispose();
-                TaskSchedulerDatabase = null;
-            }
-        }
-
-        public void UpdateServiceInfo(ServiceInfo si)
-        {
-            lock (TaskSchedulerDatabase)
-            {
-                TaskSchedulerDatabase.Update(si);
-            }
         }
 
         public void IncrementGeocachingComWWWNotAvailableCounter()
         {
-
+            lock (this)
+            {
+                if (!TaskSchedularStatus.GCComWWWError)
+                {
+                    _wwwErrors++;
+                    if (_wwwErrors > 2)
+                    {
+                        TaskSchedularStatus.GCComWWWError = true;
+                        using (var TaskSchedulerDatabase = new Database(SchedulerConnectionString, "System.Data.SqlClient"))
+                        {
+                            TaskSchedulerDatabase.Update(TaskSchedularStatus);
+                        }
+                    }
+                }
+            }
         }
         public void ResetGeocachingComWWWNotAvailableCounter()
         {
-
+            lock (this)
+            {
+                _wwwErrors = 0;
+                if (TaskSchedularStatus.GCComWWWError)
+                {
+                    _wwwErrors++;
+                    TaskSchedularStatus.GCComWWWError = false;
+                    using (var TaskSchedulerDatabase = new Database(SchedulerConnectionString, "System.Data.SqlClient"))
+                    {
+                        TaskSchedulerDatabase.Update(TaskSchedularStatus);
+                    }
+                }
+            }
         }
 
     }

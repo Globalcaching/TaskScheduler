@@ -36,7 +36,7 @@ namespace TaskScheduler
                 //first get scheduled
                 using (var db = new PetaPoco.Database(Manager.SchedulerConnectionString, "System.Data.SqlClient"))
                 {
-                    ScheduledWaypoint swp = db.SingleOrDefault<ScheduledWaypoint>("select top 1 * from ScheduledWaypoint where FullRefresh=1");
+                    ScheduledWaypoint swp = db.FirstOrDefault<ScheduledWaypoint>("select top 1 * from ScheduledWaypoint where FullRefresh=1");
                     if (swp != null)
                     {
                         activeCode = swp.Code;
@@ -51,11 +51,11 @@ namespace TaskScheduler
                         {
                             lastId = gcidList[0];
                         }
-                        GeocacheInfo gi = db.SingleOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where ID>@0 order by ID", GCComDataSupport.GeocachingDatabaseName), lastId);
+                        GeocacheInfo gi = db.FirstOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where ID>@0 order by ID", GCComDataSupport.GeocachingDatabaseName), lastId);
                         if (gi == null)
                         {
                             lastId = 0;
-                            gi = db.SingleOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where ID>@0 order by ID", GCComDataSupport.GeocachingDatabaseName), lastId);
+                            gi = db.FirstOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where ID>@0 order by ID", GCComDataSupport.GeocachingDatabaseName), lastId);
                         }
                         if (gi != null)
                         {
@@ -101,9 +101,11 @@ namespace TaskScheduler
                 }
 
                 Details = string.Format("C:{0} T:{1} S:{2}", activeCode, _wpCount, _scheduledCount);
+                ServiceInfo.ErrorInLastRun = false;
             }
             catch(Exception e)
             {
+                ServiceInfo.ErrorInLastRun = true;
                 Details = string.Format("{0} - {1}", activeCode, e.Message);
             }
         }

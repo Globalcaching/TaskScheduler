@@ -69,12 +69,12 @@ namespace TaskScheduler
                     if (!string.IsNullOrEmpty(activeCode))
                     {
                         isScheduledCache = true;
-                        GeocacheInfo gi = db.SingleOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where Code=@0", GCComDataSupport.GeocachingDatabaseName), activeCode);
+                        GeocacheInfo gi = db.FirstOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where Code=@0", GCComDataSupport.GeocachingDatabaseName), activeCode);
                         activeId = gi.ID;
                     }
                     else
                     {
-                        ScheduledWaypoint swp = db.SingleOrDefault<ScheduledWaypoint>("select top 1 * from ScheduledWaypoint where FullRefresh=0");
+                        ScheduledWaypoint swp = db.FirstOrDefault<ScheduledWaypoint>("select top 1 * from ScheduledWaypoint where FullRefresh=0");
                         if (swp != null)
                         {
                             activeCode = swp.Code;
@@ -82,7 +82,7 @@ namespace TaskScheduler
                             getAllLogs = false;
 
                             db.Execute("delete from ScheduledWaypoint where Code=@0", swp.Code);
-                            GeocacheInfo gi = db.SingleOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where Code=@0", GCComDataSupport.GeocachingDatabaseName), activeCode);
+                            GeocacheInfo gi = db.FirstOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where Code=@0", GCComDataSupport.GeocachingDatabaseName), activeCode);
                             activeId = gi.ID;
                         }
                     }
@@ -93,11 +93,11 @@ namespace TaskScheduler
                         {
                             lastId = gcidList[0];
                         }
-                        GeocacheInfo gi = db.SingleOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where ID>@0 order by ID", GCComDataSupport.GeocachingDatabaseName), lastId);
+                        GeocacheInfo gi = db.FirstOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where ID>@0 order by ID", GCComDataSupport.GeocachingDatabaseName), lastId);
                         if (gi==null)
                         {
                             lastId = 0;
-                            gi = db.SingleOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where ID>@0 order by ID", GCComDataSupport.GeocachingDatabaseName), lastId);
+                            gi = db.FirstOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where ID>@0 order by ID", GCComDataSupport.GeocachingDatabaseName), lastId);
                         }
                         if (gi != null)
                         {
@@ -144,10 +144,12 @@ namespace TaskScheduler
                 }
 
                 Details = string.Format("C:{0} T:{1} S:{2}", activeCode, _wpCount, _scheduledCount);
+                ServiceInfo.ErrorInLastRun = false;
             }
             catch(Exception e)
             {
                 Details = string.Format("{0} - {1}", activeCode, e.Message);
+                ServiceInfo.ErrorInLastRun = true;
             }
         }
     }

@@ -50,14 +50,17 @@ namespace TaskScheduler
             Busy = false;
             _stop = false;
             TaskManager = taskManager;
-            ServiceInfo = TaskManager.TaskSchedulerDatabase.SingleOrDefault<ServiceInfo>("where ClassName=@0", type.ToString());
-            if (ServiceInfo==null)
+            using (var db = TaskManager.TaskSchedulerDatabase)
             {
-                ServiceInfo = new ServiceInfo();
-                ServiceInfo.ClassName = type.ToString();
-                ServiceInfo.Description = description;
-                ServiceInfo.Interval = new DateTime(2000, 1, 1, hours, minutes, seconds, 0);
-                TaskManager.TaskSchedulerDatabase.Save(ServiceInfo);
+                ServiceInfo = db.FirstOrDefault<ServiceInfo>("where ClassName=@0", type.ToString());
+                if (ServiceInfo == null)
+                {
+                    ServiceInfo = new ServiceInfo();
+                    ServiceInfo.ClassName = type.ToString();
+                    ServiceInfo.Description = description;
+                    ServiceInfo.Interval = new DateTime(2000, 1, 1, hours, minutes, seconds, 0);
+                    db.Save(ServiceInfo);
+                }
             }
             _checkInterval = (ServiceInfo.Interval.Hour * 60 * 60 * 1000) + (ServiceInfo.Interval.Minute * 60 * 1000) + (ServiceInfo.Interval.Second * 1000);
         }
@@ -69,7 +72,10 @@ namespace TaskScheduler
 
         public void UpdateServiceInfo()
         {
-            TaskManager.TaskSchedulerDatabase.Update(ServiceInfo);
+            using (var db = TaskManager.TaskSchedulerDatabase)
+            {
+                db.Update(ServiceInfo);
+            }
             _checkInterval = (ServiceInfo.Interval.Hour * 60 * 60 * 1000) + (ServiceInfo.Interval.Minute * 60 * 1000) + (ServiceInfo.Interval.Second * 1000);
             if (ServiceInfo.Enabled)
             {
@@ -144,6 +150,10 @@ namespace TaskScheduler
                     Busy = true;
                     ServiceMethod();
                     ServiceInfo.LastRun = DateTime.Now;
+                    using (var db = TaskManager.TaskSchedulerDatabase)
+                    {
+                        db.Save(ServiceInfo);
+                    }
                 }
                 else
                 {
@@ -157,6 +167,10 @@ namespace TaskScheduler
                             Busy = true;
                             ServiceMethod();
                             ServiceInfo.LastRun = DateTime.Now;
+                            using (var db = TaskManager.TaskSchedulerDatabase)
+                            {
+                                db.Save(ServiceInfo);
+                            }
                         }
                     }
                 }

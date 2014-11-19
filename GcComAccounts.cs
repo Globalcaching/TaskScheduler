@@ -14,5 +14,8 @@ namespace TaskScheduler
         public string Name { get; set; }
         public string Token { get; set; }
         public bool Enabled { get; set; }
+        public int? CachesLeft { get; set; }
+        public int? CurrentCacheCount { get; set; }
+        public DateTime? LimitsUpdatedAt { get; set; }
     }
 }

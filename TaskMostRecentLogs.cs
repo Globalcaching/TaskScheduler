@@ -97,10 +97,12 @@ namespace TaskScheduler
                         _lastMostRecentLog = firstOfPage;
                     }
                 }
+                ServiceInfo.ErrorInLastRun = false;
             }
             catch(Exception e)
             {
                 Details = e.Message;
+                ServiceInfo.ErrorInLastRun = true;
             }
 
             if (!logsOnPage)

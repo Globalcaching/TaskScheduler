@@ -171,11 +171,13 @@ namespace TaskScheduler
                     {
                         Details = "Up to date!";
                     }
+                    ServiceInfo.ErrorInLastRun = false;
                 }
             }
             catch (Exception e)
             {
                 Details = e.Message;
+                ServiceInfo.ErrorInLastRun = true;
             }
         }
     }
