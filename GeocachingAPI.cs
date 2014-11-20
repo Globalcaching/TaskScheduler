@@ -257,7 +257,7 @@ namespace TaskScheduler
             try
             {
                 GetGeocacheLogResponse glr = lc.GetGeocacheLogsByCacheCode(token, wp, 0, maxLogs);
-                while (glr.Status.StatusCode == 0 && glr.Logs.Count() > 0)
+                if (glr.Status.StatusCode == 0 && glr.Logs.Count() > 0)
                 {
                     foreach (Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheLog l in glr.Logs)
                     {

@@ -131,7 +131,7 @@ namespace TaskScheduler
                         }
                         else
                         {
-                            List<Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheLog> logs = GeocachingAPI.GetLogsOfGeocache(token, activeCode, 30);
+                            List<Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheLog> logs = GeocachingAPI.GetLogsOfGeocache(token, activeCode, 500);
                             DataSupport.Instance.AddLogs(activeId, logs.ToArray(), false, dt);
                         }
 

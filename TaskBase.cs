@@ -140,44 +140,53 @@ namespace TaskScheduler
         {
             while (true)
             {
-                int trig = WaitHandle.WaitAny(_cfTriggers, _checkInterval, false);
-                if (trig ==Triggers.StopTrigger )
+                try
                 {
-                    break;
-                }
-                else if (trig == Triggers.StartTrigger || (!ServiceInfo.RunAfter.HasValue || !ServiceInfo.RunBefore.HasValue))
-                {
-                    Busy = true;
-                    ServiceMethod();
-                    ServiceInfo.LastRun = DateTime.Now;
-                    using (var db = TaskManager.TaskSchedulerDatabase)
+                    int trig = WaitHandle.WaitAny(_cfTriggers, _checkInterval, false);
+                    if (trig == Triggers.StopTrigger)
                     {
-                        db.Save(ServiceInfo);
+                        break;
                     }
-                }
-                else
-                {
-                    //check interval
-                    //check double check...
-                    if (ServiceInfo.RunAfter.HasValue && ServiceInfo.RunBefore.HasValue)
+                    else if (trig == Triggers.StartTrigger || (!ServiceInfo.RunAfter.HasValue || !ServiceInfo.RunBefore.HasValue))
                     {
-                        DateTime dt = DateTime.Now;
-                        if (dt >= ServiceInfo.RunAfter && dt <= ServiceInfo.RunBefore)
+                        Busy = true;
+                        ServiceMethod();
+                        ServiceInfo.LastRun = DateTime.Now;
+                        ServiceInfo.InfoMessage = Details;
+                        using (var db = TaskManager.TaskSchedulerDatabase)
                         {
-                            Busy = true;
-                            ServiceMethod();
-                            ServiceInfo.LastRun = DateTime.Now;
-                            using (var db = TaskManager.TaskSchedulerDatabase)
+                            db.Save(ServiceInfo);
+                        }
+                    }
+                    else
+                    {
+                        //check interval
+                        //check double check...
+                        if (ServiceInfo.RunAfter.HasValue && ServiceInfo.RunBefore.HasValue)
+                        {
+                            DateTime dt = DateTime.Now;
+                            if (dt >= ServiceInfo.RunAfter && dt <= ServiceInfo.RunBefore)
                             {
-                                db.Save(ServiceInfo);
+                                Busy = true;
+                                ServiceMethod();
+                                ServiceInfo.LastRun = DateTime.Now;
+                                ServiceInfo.InfoMessage = Details;
+                                using (var db = TaskManager.TaskSchedulerDatabase)
+                                {
+                                    db.Save(ServiceInfo);
+                                }
                             }
                         }
                     }
+                    Busy = false;
+                    if (_stop)
+                    {
+                        break;
+                    }
                 }
-                Busy = false;
-                if (_stop)
+                catch
                 {
-                    break;
+                    //what ever happens, we need to continue!
                 }
             }
         }
