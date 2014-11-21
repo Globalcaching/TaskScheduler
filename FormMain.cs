@@ -29,6 +29,12 @@ namespace TaskScheduler
             textBox2.Text = Properties.Settings.Default.DatabaseUser ?? "";
             textBox3.Text = Properties.Settings.Default.DatabasePassword ?? "";
 
+            textBox4.Text = Properties.Settings.Default.smtpServer ?? "";
+            textBox5.Text = Properties.Settings.Default.smtpPort.ToString();
+            checkBox1.Checked = Properties.Settings.Default.smtpUseSSL;
+            textBox7.Text = Properties.Settings.Default.smtpAccountName ?? "";
+            textBox6.Text = Properties.Settings.Default.smtpAccountPassword ?? "";
+
             if (!string.IsNullOrEmpty(Properties.Settings.Default.DatabaseServer))
             {
                 try
@@ -78,6 +84,59 @@ namespace TaskScheduler
         {
             Properties.Settings.Default.DatabasePassword = textBox3.Text;
             Properties.Settings.Default.Save();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            foreach (TaskSettingsBase c in flowLayoutPanel1.Controls)
+            {
+                c.Stop();
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            foreach (TaskSettingsBase c in flowLayoutPanel1.Controls)
+            {
+                c.RefreshInfo();
+            }
+        }
+
+        private void textBox4_TextChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.smtpServer = textBox4.Text;
+            Properties.Settings.Default.Save();
+        }
+
+        private void textBox5_TextChanged(object sender, EventArgs e)
+        {
+            int i = Properties.Settings.Default.smtpPort;
+            int.TryParse(textBox5.Text, out i);
+            Properties.Settings.Default.smtpPort = i;
+            Properties.Settings.Default.Save();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.smtpUseSSL = checkBox1.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void textBox7_TextChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.smtpAccountName = textBox7.Text;
+            Properties.Settings.Default.Save();
+        }
+
+        private void textBox6_TextChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.smtpAccountPassword = textBox6.Text;
+            Properties.Settings.Default.Save();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            EMail.SendEMail("globalcaching@gmail.com", "test subject", "test body");
         }
     }
 }

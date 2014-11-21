@@ -83,13 +83,21 @@ namespace TaskScheduler
                         Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache gcData = GeocachingAPI.GetGeocache(token, activeCode);
                         if (gcData != null)
                         {
-                            DataSupport.Instance.AddGeocache(gcData);
-
-                            //if scheduled, update logs too
-                            if (isScheduledCache)
+                            if (gcData.CountryID == 4 || gcData.CountryID == 8 || gcData.CountryID == 141)
                             {
-                                TaskUpdateLogs.AddScheduledWaypoint(activeCode);
+                                TaskManager.ResetGeocachingComLiveAPINotAvailableCounter();
+                                DataSupport.Instance.AddGeocache(gcData);
+
+                                //if scheduled, update logs too
+                                if (isScheduledCache)
+                                {
+                                    TaskUpdateLogs.AddScheduledWaypoint(activeCode);
+                                }
                             }
+                        }
+                        else
+                        {
+                            TaskManager.IncrementGeocachingComLiveAPINotAvailableCounter();
                         }
                     }
 

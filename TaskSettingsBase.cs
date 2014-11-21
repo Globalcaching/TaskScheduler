@@ -28,6 +28,16 @@ namespace TaskScheduler
             UpdateControl();
         }
 
+        public void Stop()
+        {
+            _task.ServiceStop();
+        }
+
+        public void RefreshInfo()
+        {
+            UpdateControl();
+        }
+
         public void UpdateControl()
         {
             lock (_task.ServiceInfo)

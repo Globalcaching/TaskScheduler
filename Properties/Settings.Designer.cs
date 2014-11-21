@@ -70,5 +70,65 @@ namespace TaskScheduler.Properties {
                 this["DatabasePassword"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string smtpServer {
+            get {
+                return ((string)(this["smtpServer"]));
+            }
+            set {
+                this["smtpServer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string smtpAccountName {
+            get {
+                return ((string)(this["smtpAccountName"]));
+            }
+            set {
+                this["smtpAccountName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string smtpAccountPassword {
+            get {
+                return ((string)(this["smtpAccountPassword"]));
+            }
+            set {
+                this["smtpAccountPassword"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool smtpUseSSL {
+            get {
+                return ((bool)(this["smtpUseSSL"]));
+            }
+            set {
+                this["smtpUseSSL"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int smtpPort {
+            get {
+                return ((int)(this["smtpPort"]));
+            }
+            set {
+                this["smtpPort"] = value;
+            }
+        }
     }
 }

@@ -127,12 +127,18 @@ namespace TaskScheduler
                         if (getAllLogs)
                         {
                             List<Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheLog> logs = GeocachingAPI.GetLogsOfGeocache(token, activeCode, dt);
-                            DataSupport.Instance.AddLogs(activeId, logs.ToArray(), true, dt);
+                            if (logs != null)
+                            {
+                                DataSupport.Instance.AddLogs(activeId, logs.ToArray(), true, dt);
+                            }
                         }
                         else
                         {
                             List<Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheLog> logs = GeocachingAPI.GetLogsOfGeocache(token, activeCode, 500);
-                            DataSupport.Instance.AddLogs(activeId, logs.ToArray(), false, dt);
+                            if (logs != null)
+                            {
+                                DataSupport.Instance.AddLogs(activeId, logs.ToArray(), false, dt);
+                            }
                         }
 
                         _wpCount++;

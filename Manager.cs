@@ -14,7 +14,11 @@ namespace TaskScheduler
         private int _wwwErrors = 0;
         private int _apiErrors = 0;
 
+#if DEBUG
         public static string SchedulerDatabase = "TaskScheduler_tst";
+#else
+        public static string SchedulerDatabase = "TaskScheduler";
+#endif
         public static string SchedulerConnectionString
         {
             get
@@ -42,8 +46,11 @@ namespace TaskScheduler
                 Tasks.Add(new TaskPocketQuery(this));
                 Tasks.Add(new TaskUpdateStatus(this));
                 Tasks.Add(new TaskUpdateFTFStats(this));
+                Tasks.Add(new TaskPingSite(this));
+#if DEBUG
                 Tasks.Add(new TaskUpdateFromOldDatabase(this));
                 Tasks.Add(new TaskDevelopment(this));
+#endif
                 foreach (var t in Tasks)
                 {
                     if (t.ServiceInfo.Enabled)
@@ -94,6 +101,41 @@ namespace TaskScheduler
                 {
                     _wwwErrors++;
                     TaskSchedularStatus.GCComWWWError = false;
+                    using (var TaskSchedulerDatabase = new Database(SchedulerConnectionString, "System.Data.SqlClient"))
+                    {
+                        TaskSchedulerDatabase.Update(TaskSchedularStatus);
+                    }
+                }
+            }
+        }
+
+        public void IncrementGeocachingComLiveAPINotAvailableCounter()
+        {
+            lock (this)
+            {
+                if (!TaskSchedularStatus.LiveAPIError)
+                {
+                    _apiErrors++;
+                    if (_apiErrors > 2)
+                    {
+                        TaskSchedularStatus.LiveAPIError = true;
+                        using (var TaskSchedulerDatabase = new Database(SchedulerConnectionString, "System.Data.SqlClient"))
+                        {
+                            TaskSchedulerDatabase.Update(TaskSchedularStatus);
+                        }
+                    }
+                }
+            }
+        }
+        public void ResetGeocachingComLiveAPINotAvailableCounter()
+        {
+            lock (this)
+            {
+                _apiErrors = 0;
+                if (TaskSchedularStatus.LiveAPIError)
+                {
+                    _apiErrors++;
+                    TaskSchedularStatus.LiveAPIError = false;
                     using (var TaskSchedulerDatabase = new Database(SchedulerConnectionString, "System.Data.SqlClient"))
                     {
                         TaskSchedulerDatabase.Update(TaskSchedularStatus);

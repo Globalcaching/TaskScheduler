@@ -23,87 +23,90 @@ namespace TaskScheduler
                 {
                     foreach (GcComAccounts sai in GeocachingAPI.Instance.GCComPMAccounts)
                     {
-                        try
+                        if (sai.Enabled)
                         {
-                            if (sai.Token.Length > 0)
+                            try
                             {
-                                www.geocaching.com.Geocaching1.Live.data.PQData[] pqData = GeocachingAPI.GetPocketQueryList(sai.Token);
-                                if (pqData != null)
+                                if (sai.Token.Length > 0)
                                 {
-                                    foreach (www.geocaching.com.Geocaching1.Live.data.PQData pq in pqData)
+                                    www.geocaching.com.Geocaching1.Live.data.PQData[] pqData = GeocachingAPI.GetPocketQueryList(sai.Token);
+                                    if (pqData != null)
                                     {
-                                        try
+                                        foreach (www.geocaching.com.Geocaching1.Live.data.PQData pq in pqData)
                                         {
-                                            if (pq.IsDownloadAvailable)
+                                            try
                                             {
-                                                //download
-                                                byte[] data = GeocachingAPI.GetPocketQueryData(sai.Token, pq);
-                                                //process
-                                                if (data != null)
+                                                if (pq.IsDownloadAvailable)
                                                 {
-                                                    ZipInputStream s = null;
-                                                    s = new ZipInputStream(new System.IO.MemoryStream(data));
-                                                    try
+                                                    //download
+                                                    byte[] data = GeocachingAPI.GetPocketQueryData(sai.Token, pq);
+                                                    //process
+                                                    if (data != null)
                                                     {
-                                                        ZipEntry theEntry = s.GetNextEntry();
-                                                        if (theEntry != null)
+                                                        ZipInputStream s = null;
+                                                        s = new ZipInputStream(new System.IO.MemoryStream(data));
+                                                        try
                                                         {
-                                                            if (theEntry.Name.ToLower().IndexOf("-wpts.") > 0)
+                                                            ZipEntry theEntry = s.GetNextEntry();
+                                                            if (theEntry != null)
                                                             {
-                                                                theEntry = s.GetNextEntry();
-                                                            }
-                                                        }
-                                                        if (theEntry != null)
-                                                        {
-                                                            int size;
-                                                            StringBuilder sb = new StringBuilder();
-                                                            byte[] tmpdata = new byte[1024];
-                                                            while (true)
-                                                            {
-                                                                size = s.Read(tmpdata, 0, tmpdata.Length);
-                                                                if (size > 0)
+                                                                if (theEntry.Name.ToLower().IndexOf("-wpts.") > 0)
                                                                 {
-                                                                    if (sb.Length == 0 && tmpdata[0] == 0xEF && size > 2)
+                                                                    theEntry = s.GetNextEntry();
+                                                                }
+                                                            }
+                                                            if (theEntry != null)
+                                                            {
+                                                                int size;
+                                                                StringBuilder sb = new StringBuilder();
+                                                                byte[] tmpdata = new byte[1024];
+                                                                while (true)
+                                                                {
+                                                                    size = s.Read(tmpdata, 0, tmpdata.Length);
+                                                                    if (size > 0)
                                                                     {
-                                                                        sb.Append(System.Text.ASCIIEncoding.UTF8.GetString(tmpdata, 3, size - 3));
+                                                                        if (sb.Length == 0 && tmpdata[0] == 0xEF && size > 2)
+                                                                        {
+                                                                            sb.Append(System.Text.ASCIIEncoding.UTF8.GetString(tmpdata, 3, size - 3));
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            sb.Append(System.Text.ASCIIEncoding.UTF8.GetString(tmpdata, 0, size));
+                                                                        }
                                                                     }
                                                                     else
                                                                     {
-                                                                        sb.Append(System.Text.ASCIIEncoding.UTF8.GetString(tmpdata, 0, size));
+                                                                        break;
                                                                     }
                                                                 }
-                                                                else
-                                                                {
-                                                                    break;
-                                                                }
-                                                            }
 
-                                                            ProcessGeocachingComGPX(dbcon, sb.ToString());
+                                                                ProcessGeocachingComGPX(dbcon, sb.ToString(), sai.Name, pq.Name);
+                                                            }
                                                         }
+                                                        catch
+                                                        {
+                                                            //"ERROR unzippig or processing PQ");
+                                                        }
+                                                        s.Close();
                                                     }
-                                                    catch
+                                                    else
                                                     {
-                                                        //"ERROR unzippig or processing PQ");
+                                                        //("ERROR downloading PQ");
                                                     }
-                                                    s.Close();
-                                                }
-                                                else
-                                                {
-                                                    //("ERROR downloading PQ");
                                                 }
                                             }
-                                        }
-                                        catch (Exception e)
-                                        {
-                                            Details = e.Message;
+                                            catch (Exception e)
+                                            {
+                                                Details = e.Message;
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            Details = e.Message;
+                            catch (Exception e)
+                            {
+                                Details = e.Message;
+                            }
                         }
                     }
                     Details = "";
@@ -117,7 +120,7 @@ namespace TaskScheduler
             }
         }
 
-        private void ProcessGeocachingComGPX(PetaPoco.Database dbcon, string gpxDoc)
+        private void ProcessGeocachingComGPX(PetaPoco.Database dbcon, string gpxDoc, string gcComAccountName, string pqName)
         {
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(gpxDoc);
@@ -129,22 +132,31 @@ namespace TaskScheduler
             XmlNodeList wps = root.SelectNodes("x:wpt", nsmgr);
             if (wps != null)
             {
+                int gcCount = 0;
                 List<string> wpInPQ = new List<string>();
                 foreach (XmlNode wpn in wps)
                 {
                     string wp = wpn.SelectSingleNode("x:name", nsmgr).InnerText;
-                    if (dbcon.Fetch<long>("SELECT ID FROM GCComGeocache WHERE Code=@0", wp).Count == 0)
+                    if (wp.StartsWith("GC"))
                     {
-                        ScheduledWaypoint swp = dbcon.FirstOrDefault<ScheduledWaypoint>(string.Format("select * from [{0}].[dbo].[ScheduledWaypoint] where Code=@0", Manager.SchedulerDatabase), wp);
-                        if (swp == null)
+                        gcCount++;
+                        if (dbcon.Fetch<long>("SELECT ID FROM GCComGeocache WHERE Code=@0", wp).Count == 0)
                         {
-                            swp = new ScheduledWaypoint();
-                            swp.Code = wp;
-                            swp.DateAdded = DateTime.Now;
-                            swp.FullRefresh = true;
-                            dbcon.Insert(string.Format("[{0}].[dbo].[ScheduledWaypoint]", Manager.SchedulerDatabase), null, false, swp);
+                            ScheduledWaypoint swp = dbcon.FirstOrDefault<ScheduledWaypoint>(string.Format("select * from [{0}].[dbo].[ScheduledWaypoint] where Code=@0", Manager.SchedulerDatabase), wp);
+                            if (swp == null)
+                            {
+                                swp = new ScheduledWaypoint();
+                                swp.Code = wp;
+                                swp.DateAdded = DateTime.Now;
+                                swp.FullRefresh = true;
+                                dbcon.Insert(string.Format("[{0}].[dbo].[ScheduledWaypoint]", Manager.SchedulerDatabase), null, false, swp);
+                            }
                         }
                     }
+                }
+                if (gcCount >= 1000)
+                {
+                    EMail.SendEMail("globalcaching@gmail.com", string.Format("PQ {0} is vol", pqName), string.Format("PQ {0} van account {1} is vol.", pqName, gcComAccountName));
                 }
             }
         }
