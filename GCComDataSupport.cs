@@ -234,6 +234,8 @@ namespace TaskScheduler
         }
         public void AddLogs(PetaPoco.Database db, long geocacheId, GeocacheLog[] logs, bool checkRemoved, DateTime updateOnlyAfter)
         {
+            DateTime? mostRecentFoundDate = DateTime.MinValue;
+            DateTime? mostRecentArchivedDate = DateTime.MinValue;
             int foundCount = 0;
             int incFoundCount = 0;
             DateTime? publishedDate = null;
@@ -246,10 +248,21 @@ namespace TaskScheduler
                     if (FoundLogTypeIds.Contains(l.LogType.WptLogTypeId))
                     {
                         foundCount++;
+                        if (mostRecentFoundDate < l.VisitDate)
+                        {
+                            mostRecentFoundDate = l.VisitDate;
+                        }
                     }
                     else if (l.LogType.WptLogTypeId == 24)
                     {
                         publishedDate = l.VisitDate;
+                    }
+                    else if (l.LogType.WptLogTypeId == 5 || l.LogType.WptLogTypeId == 6)
+                    {
+                        if (mostRecentArchivedDate < l.VisitDate)
+                        {
+                            mostRecentArchivedDate = l.VisitDate;
+                        }
                     }
                 }
                 if (l.UTCCreateDate >= updateOnlyAfter || l.VisitDate >= updateOnlyAfter)
@@ -282,13 +295,13 @@ namespace TaskScheduler
                         db.Execute("delete from GCComGeocacheLog where ID=@0", l);
                     }
                 }
-                GCEuDataSupport.Instance.SetFoundCountForGeocache(geocacheId, favPoints, logImgCount, foundCount, publishedDate);
+                GCEuDataSupport.Instance.SetFoundCountForGeocache(geocacheId, favPoints, logImgCount, foundCount, publishedDate, mostRecentFoundDate == DateTime.MinValue ? null : mostRecentFoundDate, mostRecentArchivedDate == DateTime.MinValue ? null : mostRecentArchivedDate);
             }
             else
             {
                 if (incFoundCount > 0)
                 {
-                    GCEuDataSupport.Instance.AddFoundCountForGeocache(geocacheId, favPoints, logImgCount, incFoundCount);
+                    GCEuDataSupport.Instance.AddFoundCountForGeocache(geocacheId, favPoints, logImgCount, incFoundCount, mostRecentFoundDate == DateTime.MinValue ? null : mostRecentFoundDate, mostRecentArchivedDate == DateTime.MinValue ? null : mostRecentArchivedDate);
                 }
             }
         }

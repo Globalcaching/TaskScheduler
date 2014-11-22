@@ -22,11 +22,20 @@ namespace TaskScheduler
         {
             try
             {
-                updatePublisheddate();
+                //updatePublisheddate();
+                clearQueue();
             }
             catch (Exception e)
             {
                 Details = e.Message;
+            }
+        }
+
+        private void clearQueue()
+        {
+            using (var db = TaskManager.TaskSchedulerDatabase)
+            {
+                db.Execute("truncate table ScheduledWaypoint");
             }
         }
 
