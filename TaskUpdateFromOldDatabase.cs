@@ -98,7 +98,7 @@ namespace TaskScheduler
                         .From("GCComGeocache")
                         .InnerJoin(string.Format("[{0}].[dbo].[GCEuGeocache]", GCEuDataSupport.GlobalcachingDatabaseName)).On("GCComGeocache.ID = GCEuGeocache.ID")
                         .Where("CountryID=141")
-                        .Append("AND (Municipality=NULL OR City=NULL OR DistanceChecked=0 OR FTFCompleted=0)")
+                        .Append("AND (Municipality is NULL OR City is NULL OR DistanceChecked=0 OR FTFCompleted=0)")
                         );
 
                     if (gcEUCaches.Count > 0)

@@ -77,11 +77,53 @@ namespace TaskScheduler
             {
                 if (publishedDate == null)
                 {
-                    db.Execute("update GCEuGeocache set FoundCount = @0, LogImageCount = @1, MostRecentFoundDate = @2, MostRecentArchivedDate = @3 where ID=@4", incrementValue, LogImageCount, mostRecentFoundDate, mostRecentArchivedDate, geocacheId);
+                    if (mostRecentFoundDate == null)
+                    {
+                        if (mostRecentArchivedDate == null)
+                        {
+                            db.Execute("update GCEuGeocache set FoundCount = @0, LogImageCount = @1, MostRecentFoundDate = NULL, MostRecentArchivedDate = NULL where ID=@2", incrementValue, LogImageCount, geocacheId);
+                        }
+                        else
+                        {
+                            db.Execute("update GCEuGeocache set FoundCount = @0, LogImageCount = @1, MostRecentFoundDate = NULL, MostRecentArchivedDate = @2 where ID=@3", incrementValue, LogImageCount, (DateTime)mostRecentArchivedDate, geocacheId);
+                        }
+                    }
+                    else
+                    {
+                        if (mostRecentArchivedDate == null)
+                        {
+                            db.Execute("update GCEuGeocache set FoundCount = @0, LogImageCount = @1, MostRecentFoundDate = @2, MostRecentArchivedDate = NULL where ID=@3", incrementValue, LogImageCount, (DateTime)mostRecentFoundDate, geocacheId);
+                        }
+                        else
+                        {
+                            db.Execute("update GCEuGeocache set FoundCount = @0, LogImageCount = @1, MostRecentFoundDate = @2, MostRecentArchivedDate = @3 where ID=@4", incrementValue, LogImageCount, (DateTime)mostRecentFoundDate, (DateTime)mostRecentArchivedDate, geocacheId);
+                        }
+                    }
                 }
                 else
                 {
-                    db.Execute("update GCEuGeocache set FoundCount = @0, LogImageCount = @1, PublishedAtDate=@2, MostRecentFoundDate = @2, MostRecentArchivedDate = @3 where ID=@4", incrementValue, LogImageCount, (DateTime)publishedDate, (DateTime)mostRecentFoundDate, (DateTime)mostRecentArchivedDate, geocacheId);
+                    if (mostRecentFoundDate == null)
+                    {
+                        if (mostRecentArchivedDate == null)
+                        {
+                            db.Execute("update GCEuGeocache set FoundCount = @0, LogImageCount = @1, PublishedAtDate=@2, MostRecentFoundDate = NULL, MostRecentArchivedDate = NULL where ID=@3", incrementValue, LogImageCount, (DateTime)publishedDate, geocacheId);
+                        }
+                        else
+                        {
+                            db.Execute("update GCEuGeocache set FoundCount = @0, LogImageCount = @1, PublishedAtDate=@2, MostRecentFoundDate = NULL, MostRecentArchivedDate = @3 where ID=@4", incrementValue, LogImageCount, (DateTime)publishedDate, (DateTime)mostRecentArchivedDate, geocacheId);
+                        }
+                    }
+                    else
+                    {
+                        if (mostRecentArchivedDate == null)
+                        {
+                            db.Execute("update GCEuGeocache set FoundCount = @0, LogImageCount = @1, PublishedAtDate=@2, MostRecentFoundDate = @3, MostRecentArchivedDate = NULL where ID=@4", incrementValue, LogImageCount, (DateTime)publishedDate, (DateTime)mostRecentFoundDate, geocacheId);
+                        }
+                        else
+                        {
+                            db.Execute("update GCEuGeocache set FoundCount = @0, LogImageCount = @1, PublishedAtDate=@2, MostRecentFoundDate = @3, MostRecentArchivedDate = @4 where ID=@5", incrementValue, LogImageCount, (DateTime)publishedDate, (DateTime)mostRecentFoundDate, (DateTime)mostRecentArchivedDate, geocacheId);
+                        }
+                    }
                 }
                 db.Execute("update GCEuGeocache set FavPer100Found = CASE WHEN FoundCount=0 THEN 0 ELSE 100*CONVERT(FLOAT,@0)/CONVERT(FLOAT,FoundCount) END, LogImagePer100Found = CASE WHEN FoundCount=0 THEN 0 ELSE 100*CONVERT(FLOAT,@1)/CONVERT(FLOAT,FoundCount) END where ID=@2", FavoriteCount, LogImageCount, geocacheId);
             }
