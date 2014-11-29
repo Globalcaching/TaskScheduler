@@ -97,7 +97,7 @@ namespace TaskScheduler
                         if (gi==null)
                         {
                             lastId = 0;
-                            gi = db.FirstOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where ID>@1 order by ID", GCComDataSupport.GeocachingDatabaseName), lastId);
+                            gi = db.FirstOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where ID>@0 order by ID", GCComDataSupport.GeocachingDatabaseName), lastId);
                         }
                         if (gi != null)
                         {
