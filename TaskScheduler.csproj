@@ -144,6 +144,7 @@
     <Compile Include="TaskMostRecentLogs.cs" />
     <Compile Include="TaskPingSite.cs" />
     <Compile Include="TaskPocketQuery.cs" />
+    <Compile Include="TaskReindex.cs" />
     <Compile Include="TaskSettingsBase.cs">
       <SubType>UserControl</SubType>
     </Compile>
