@@ -92,6 +92,7 @@ namespace TaskScheduler
                                 if (isScheduledCache)
                                 {
                                     TaskUpdateLogs.AddScheduledWaypoint(activeCode);
+                                    TaskGeocacheImages.AddScheduledWaypoint(activeCode);
                                 }
                             }
                         }

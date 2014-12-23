@@ -88,6 +88,8 @@
     <Compile Include="Models\GCComUser.cs" />
     <Compile Include="Models\GCEuCCCUser.cs" />
     <Compile Include="Models\GCEuComUserNameChange.cs" />
+    <Compile Include="Models\GCEuCoordCheckAttempt.cs" />
+    <Compile Include="Models\GCEuCoordCheckCode.cs" />
     <Compile Include="Models\GCEuFTFStats.cs" />
     <Compile Include="Models\GCEuGeocache.cs" />
     <Compile Include="PetaPoco.cs" />
@@ -141,6 +143,7 @@
     <Compile Include="SHP\ShapeFilesManager.cs" />
     <Compile Include="TaskBase.cs" />
     <Compile Include="TaskDevelopment.cs" />
+    <Compile Include="TaskGeocacheImages.cs" />
     <Compile Include="TaskMostRecentLogs.cs" />
     <Compile Include="TaskPingSite.cs" />
     <Compile Include="TaskPocketQuery.cs" />
