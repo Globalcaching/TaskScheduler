@@ -165,7 +165,9 @@ namespace TaskScheduler
                         if (ServiceInfo.RunAfter.HasValue && ServiceInfo.RunBefore.HasValue)
                         {
                             DateTime dt = DateTime.Now;
-                            if (dt >= ServiceInfo.RunAfter && dt <= ServiceInfo.RunBefore)
+                            DateTime st = DateTime.Now.Date + (ServiceInfo.RunAfter.Value - ServiceInfo.RunAfter.Value.Date);
+                            DateTime et = DateTime.Now.Date + (ServiceInfo.RunBefore.Value - ServiceInfo.RunBefore.Value.Date);
+                            if (dt >= st && dt <= et)
                             {
                                 Busy = true;
                                 ServiceMethod();
