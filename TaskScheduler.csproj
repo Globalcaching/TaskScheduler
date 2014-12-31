@@ -87,6 +87,8 @@
     <Compile Include="Models\GCComLogType.cs" />
     <Compile Include="Models\GCComUser.cs" />
     <Compile Include="Models\GCEuCCCUser.cs" />
+    <Compile Include="Models\GCEuCodeCheckAttempt.cs" />
+    <Compile Include="Models\GCEuCodeCheckCode.cs" />
     <Compile Include="Models\GCEuComUserNameChange.cs" />
     <Compile Include="Models\GCEuCoordCheckAttempt.cs" />
     <Compile Include="Models\GCEuCoordCheckCode.cs" />

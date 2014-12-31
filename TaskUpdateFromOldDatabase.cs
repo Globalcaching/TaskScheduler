@@ -87,6 +87,28 @@ namespace TaskScheduler
                     {
                         db.Execute("delete from GCEuCCCUser where UserID=@0", cusr.UserID);
                     }
+
+                    //coord check
+                    db.Execute("insert into GCEuData.dbo.GCEuCoordCheckCode (Code, UserID, Lat, Lon, NotifyOnFailure, NotifyOnSuccess, Radius ) select CoordCheckWaypoints.Waypoint as Code, CoordCheckWaypoints.UserID, CoordCheckWaypoints.Lat, CoordCheckWaypoints.Lon, CoordCheckWaypoints.NotifyOnFailure, CoordCheckWaypoints.NotifyOnSuccess, CoordCheckWaypoints.Radius from globalcaching.dbo.CoordCheckWaypoints left join GCEuData.dbo.GCEuCoordCheckCode on CoordCheckWaypoints.Waypoint COLLATE DATABASE_DEFAULT = GCEuCoordCheckCode.Code COLLATE DATABASE_DEFAULT where GCEuCoordCheckCode.Code is null");
+                    db.Execute("truncate table GCEuData.dbo.GCEuCoordCheckAttempt");
+                    db.Execute("insert into GCEuData.dbo.GCEuCoordCheckAttempt (Waypoint, Lat, Lon, VisitorID, AttemptAt ) select CoordCheckAttempts.Waypoint, CoordCheckAttempts.Lat, CoordCheckAttempts.Lon, CoordCheckAttempts.VisitorID, Convert(datetime, substring(CoordCheckAttempts.AttemptAt,1,19), 20) as AttemptAt from globalcaching.dbo.CoordCheckAttempts left join GCEuData.dbo.GCEuCoordCheckAttempt on CoordCheckAttempts.Waypoint COLLATE DATABASE_DEFAULT = GCEuCoordCheckAttempt.Waypoint COLLATE DATABASE_DEFAULT and Convert(datetime, substring(CoordCheckAttempts.AttemptAt,1,19), 20) = GCEuCoordCheckAttempt.AttemptAt  where GCEuCoordCheckAttempt.Waypoint is null");
+
+                    //code check
+                    db.Execute("truncate table GCEuData.dbo.GCEuCodeCheckCode");
+                    db.Execute("truncate table GCEuData.dbo.GCEuCodeCheckAttempt");
+                    var ccList = db.Fetch<GCEuCodeCheckCode>("select * from Globalcaching.dbo.CodeCheckCode");
+                    foreach (var cc in ccList)
+                    {
+                        int orgID = cc.ID;
+                        cc.ID = 0;
+                        db.Insert(cc);
+                        var attempts = db.Fetch<GCEuCodeCheckAttempt>("select * from Globalcaching.dbo.CodeCheckAttempt where CodeID=@0", orgID);
+                        foreach (var att in attempts)
+                        {
+                            att.CodeID = cc.ID;
+                            db.Insert(att);
+                        }
+                    }
                 }
 
 
