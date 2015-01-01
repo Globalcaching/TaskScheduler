@@ -102,12 +102,15 @@ namespace TaskScheduler
                         int orgID = cc.ID;
                         cc.ID = 0;
                         db.Insert(cc);
+                        db.Execute(string.Format("insert into GCEuData.dbo.GCEuCodeCheckAttempt (CodeID, AttemptAt, VisitorID, Answer, GroundspeakUserName) select CodeID = {0}, AttemptAt, VisitorID, Answer, GroundspeakUserName from Globalcaching.dbo.CodeCheckAttempt where CodeID=@0", cc.ID), orgID);
+                        /*
                         var attempts = db.Fetch<GCEuCodeCheckAttempt>("select * from Globalcaching.dbo.CodeCheckAttempt where CodeID=@0", orgID);
                         foreach (var att in attempts)
                         {
                             att.CodeID = cc.ID;
                             db.Insert(att);
                         }
+                         * */
                     }
                 }
 
