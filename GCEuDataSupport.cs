@@ -52,6 +52,14 @@ namespace TaskScheduler
             return new PetaPoco.Database(GCEuDataConnectionString, "System.Data.SqlClient");
         }
 
+        public void AddTrackable(Trackable tb)
+        {
+            using (PetaPoco.Database db = GetGCEuDataDatabase())
+            {
+                db.Execute("update GCEuTrackable set Updated=@0 where Code=@1", DateTime.Now, tb.Code);
+            }
+        }
+
         public void AddGeocache(Geocache gc)
         {
             using (PetaPoco.Database db = GetGCEuDataDatabase())

@@ -85,6 +85,8 @@
     <Compile Include="Models\GCComGeocacheLogImage.cs" />
     <Compile Include="Models\GCComGeocacheType.cs" />
     <Compile Include="Models\GCComLogType.cs" />
+    <Compile Include="Models\GCComTrackableLog.cs" />
+    <Compile Include="Models\GCComTrackable.cs" />
     <Compile Include="Models\GCComUser.cs" />
     <Compile Include="Models\GCEuCCCUser.cs" />
     <Compile Include="Models\GCEuCodeCheckAttempt.cs" />
@@ -94,9 +96,11 @@
     <Compile Include="Models\GCEuCoordCheckCode.cs" />
     <Compile Include="Models\GCEuFTFStats.cs" />
     <Compile Include="Models\GCEuGeocache.cs" />
+    <Compile Include="Models\GCEuTrackable.cs" />
     <Compile Include="PetaPoco.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScheduledTrackable.cs" />
     <Compile Include="ScheduledWaypoint.cs" />
     <Compile Include="SchedulerStatus.cs" />
     <Compile Include="ServiceInfo.cs" />
@@ -149,17 +153,16 @@
     <Compile Include="TaskMostRecentLogs.cs" />
     <Compile Include="TaskPingSite.cs" />
     <Compile Include="TaskPocketQuery.cs" />
-    <Compile Include="TaskReindex.cs" />
     <Compile Include="TaskSettingsBase.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="TaskSettingsBase.Designer.cs">
       <DependentUpon>TaskSettingsBase.cs</DependentUpon>
     </Compile>
-    <Compile Include="TaskUpdateFromOldDatabase.cs" />
     <Compile Include="TaskUpdateFTFStats.cs" />
     <Compile Include="TaskUpdateLogs.cs" />
     <Compile Include="TaskUpdateStatus.cs" />
+    <Compile Include="TaskUpdateTrackables.cs" />
     <Compile Include="TaskWalkWaypoints.cs" />
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>

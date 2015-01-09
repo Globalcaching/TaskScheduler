@@ -107,6 +107,81 @@ namespace TaskScheduler
             return result;
         }
 
+        public static Tucson.Geocaching.WCF.API.Geocaching1.Types.Trackable GetTrackable(string token, string tb)
+        {
+            Tucson.Geocaching.WCF.API.Geocaching1.Types.Trackable result = null;
+
+            LiveClient lc = GetLiveClient();
+            try
+            {
+                GetTrackableResponse resp = lc.GetTrackablesByTBCode(token, tb, 0);
+                if (resp.Status.StatusCode == 0)
+                {
+                    if (resp.Trackables.Count() > 0)
+                    {
+                        result = resp.Trackables[0];
+                    }
+                }
+            }
+            catch
+            {
+            }
+            lc.Close();
+            return result;
+        }
+
+
+        public static List<Tucson.Geocaching.WCF.API.Geocaching1.Types.TrackableLog> GetTrackableLogs(string token, string tb)
+        {
+            int pageSize = 30;
+            int callDelay = 2100;
+
+            long prevCollAt;
+            long nextCollAt;
+
+            List<Tucson.Geocaching.WCF.API.Geocaching1.Types.TrackableLog> result = new List<Tucson.Geocaching.WCF.API.Geocaching1.Types.TrackableLog>();
+            LiveClient lc = GetLiveClient();
+            try
+            {
+                prevCollAt = Environment.TickCount;
+                GetTrackableLogsResponse glr = lc.GetTrackableLogsByTBCode(token, tb, result.Count, pageSize);
+                while (glr.Status.StatusCode == 0 && glr.TrackableLogs.Count() > 0)
+                {
+                    int startIndex = result.Count;
+                    foreach (Tucson.Geocaching.WCF.API.Geocaching1.Types.TrackableLog l in glr.TrackableLogs)
+                    {
+                        result.Add(l);
+                    }
+                    if (glr.TrackableLogs.Count() < pageSize)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        nextCollAt = prevCollAt + callDelay;
+                        int delay = (int)(nextCollAt - Environment.TickCount);
+                        if (delay > 0 && delay <= callDelay)
+                        {
+                            System.Threading.Thread.Sleep(delay); //max 30 per minute
+                        }
+                        prevCollAt = Environment.TickCount;
+                        glr = lc.GetTrackableLogsByTBCode(token, tb, result.Count, pageSize);
+                    }
+                }
+                if (glr.Status.StatusCode != 0)
+                {
+                    result = null;
+                }
+            }
+            catch
+            {
+                result = null;
+            }
+            lc.Close();
+            return result;
+        }
+
+
         public static Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheType[] GetGeocacheTypes(string token)
         {
             Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheType[] result = null;

@@ -48,9 +48,8 @@ namespace TaskScheduler
                 Tasks.Add(new TaskUpdateFTFStats(this));
                 Tasks.Add(new TaskPingSite(this));
                 Tasks.Add(new TaskGeocacheImages(this));
+                Tasks.Add(new TaskUpdateTrackables(this));
 #if DEBUG
-                Tasks.Add(new TaskReindex(this));
-                Tasks.Add(new TaskUpdateFromOldDatabase(this));
                 Tasks.Add(new TaskDevelopment(this));
 #endif
                 foreach (var t in Tasks)

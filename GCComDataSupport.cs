@@ -116,6 +116,56 @@ namespace TaskScheduler
             }
         }
 
+        public void AddTrackable(Trackable tb, List<TrackableLog> logs)
+        {
+            using (PetaPoco.Database db = GetGCComDataDatabase())
+            {
+                var tbData = GCComTrackable.From(tb);
+                //delete removed logs
+                var existLogs = db.Fetch<GCComTrackableLog>("where TrackableID=@0", tb.Id);
+                foreach (var l in existLogs)
+                {
+                    if ((from a in logs where a.ID == l.ID select a).Count() == 0)
+                    {
+                        db.Execute("delete from GCComTrackableLog where ID=@0", l.ID);
+                    }
+                }
+                //add update existing log
+                foreach (var l in logs)
+                {
+                    var log = GCComTrackableLog.From(l, tb.Id);
+                    if ((from a in existLogs where a.ID == l.ID select a).Count() == 0)
+                    {
+                        db.Insert(log);
+                    }
+                    else
+                    {
+                        db.Update("GCComTrackableLog", "ID", log);
+                    }
+                    if (l.LoggedBy != null)
+                    {
+                        AddMember(db, l.LoggedBy);
+                    }
+                }
+                if (db.Fetch<long>("SELECT ID FROM GCComTrackable WHERE ID=@0", tbData.ID).Count == 0)
+                {
+                    db.Insert(tbData);
+                }
+                else
+                {
+                    db.Update("GCComTrackable", "ID", tbData);
+                }
+                if (tb.OriginalOwner != null)
+                {
+                    AddMember(db, tb.OriginalOwner);
+                }
+                if (tb.CurrentOwner != null)
+                {
+                    AddMember(db, tb.CurrentOwner);
+                }
+            }
+        }
+
         public void AddGeocache(Geocache gc)
         {
             using (PetaPoco.Database db = GetGCComDataDatabase())

@@ -34,6 +34,12 @@ namespace TaskScheduler
             }
         }
 
+        public void AddTrackable(Trackable tb, List<TrackableLog> logs)
+        {
+            GCComDataSupport.Instance.AddTrackable(tb, logs);
+            GCEuDataSupport.Instance.AddTrackable(tb);
+        }
+
         public void AddGeocache(Geocache gc)
         {
             GCEuDataSupport.Instance.AddGeocache(gc);
