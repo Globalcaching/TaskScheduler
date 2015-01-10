@@ -107,6 +107,26 @@ namespace TaskScheduler
             return result;
         }
 
+        public static Tucson.Geocaching.WCF.API.Geocaching1.Types.TrackableTravel[] GetTrackableTravel(string token, string tb)
+        {
+            Tucson.Geocaching.WCF.API.Geocaching1.Types.TrackableTravel[] result = null;
+
+            LiveClient lc = GetLiveClient();
+            try
+            {
+                GetTrackableTravelResponse resp = lc.GetTrackableTravelList(token, tb);
+                if (resp.Status.StatusCode == 0)
+                {
+                    result = resp.TrackableTravels;
+                }
+            }
+            catch
+            {
+            }
+            lc.Close();
+            return result;
+        }
+
         public static Tucson.Geocaching.WCF.API.Geocaching1.Types.Trackable GetTrackable(string token, string tb)
         {
             Tucson.Geocaching.WCF.API.Geocaching1.Types.Trackable result = null;

@@ -12,5 +12,10 @@ namespace TaskScheduler.Models
         public string Code { get; set; }
         public int GroupID { get; set; }
         public DateTime? Updated { get; set; }
+        public double? Lat { get; set; }
+        public double? Lon { get; set; }
+        public double? Distance { get; set; }
+        public int? Drops { get; set; }
+        public int? Discovers { get; set; }
     }
 }

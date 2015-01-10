@@ -5,6 +5,7 @@ using System.Web;
 using Tucson.Geocaching.WCF.API.Geocaching1.Types;
 using System.Configuration;
 using TaskScheduler.Models;
+using Gavaghan.Geodesy;
 
 namespace TaskScheduler
 {
@@ -52,11 +53,41 @@ namespace TaskScheduler
             return new PetaPoco.Database(GCEuDataConnectionString, "System.Data.SqlClient");
         }
 
-        public void AddTrackable(Trackable tb)
+        public void AddTrackable(Trackable tb, List<TrackableLog> logs, TrackableTravel[] tl)
         {
             using (PetaPoco.Database db = GetGCEuDataDatabase())
             {
-                db.Execute("update GCEuTrackable set Updated=@0 where Code=@1", DateTime.Now, tb.Code);
+                var m = db.FirstOrDefault<GCEuTrackable>("where Code=@0", tb.Code);
+                if (m != null)
+                {
+                    m.Updated = DateTime.Now;
+                    m.Drops = (from a in logs where a.LogType != null && a.LogType.WptLogTypeId == 14 select a).Count();
+                    m.Discovers = (from a in logs where a.LogType != null && a.LogType.WptLogTypeId == 48 select a).Count();
+                    m.Lat = null;
+                    m.Lon = null;
+                    m.Distance = 0;
+                    if (tl != null && tl.Length > 0)
+                    {
+                        m.Lat = (double)tl[tl.Length - 1].Latitude;
+                        m.Lon = (double)tl[tl.Length - 1].Longitude;
+
+                        LatLon ll1 = new LatLon();
+                        LatLon ll2 = new LatLon();
+
+                        for (int i = 0; i < tl.Length - 1; i++)
+                        {
+                            ll1.lat = (double)tl[i].Latitude;
+                            ll1.lon = (double)tl[i].Longitude;
+                            ll2.lat = (double)tl[i + 1].Latitude;
+                            ll2.lon = (double)tl[i + 1].Longitude;
+                            GeodeticMeasurement gm = Helper.CalculateDistance(ll1, ll2);
+                            m.Distance += gm.EllipsoidalDistance;
+                        }
+
+                        m.Distance = m.Distance / 1000.0;
+                    }
+                    db.Update("GCEuTrackable", "Code", m);
+                }
             }
         }
 

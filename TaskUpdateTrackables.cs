@@ -44,11 +44,11 @@ namespace TaskScheduler
                         {
                             activeCode = gcidList[0];
                         }
-                        activeCode = db.FirstOrDefault<string>(string.Format("select top 1 Code from [{0}].[dbo].[GCEuTrackable] where Code>@0 order by Code", GCEuDataSupport.GlobalcachingDatabaseName), activeCode);
+                        activeCode = db.FirstOrDefault<string>(string.Format("select top 1 Code from [{0}].[dbo].[GCEuTrackable] where Code>@0 and Updated<=@1 order by Code", GCEuDataSupport.GlobalcachingDatabaseName), activeCode, DateTime.Now.AddDays(-1));
                         if (string.IsNullOrEmpty(activeCode))
                         {
                             activeCode = "";
-                            activeCode = db.FirstOrDefault<string>(string.Format("select top 1 Code from [{0}].[dbo].[GCEuTrackable] where Code>@0 order by Code", GCEuDataSupport.GlobalcachingDatabaseName), activeCode);
+                            activeCode = db.FirstOrDefault<string>(string.Format("select top 1 Code from [{0}].[dbo].[GCEuTrackable] where Code>@0 and Updated<=@1 order by Code", GCEuDataSupport.GlobalcachingDatabaseName), activeCode, DateTime.Now.AddDays(-1));
                         }
                         if (!string.IsNullOrEmpty(activeCode))
                         {
@@ -73,10 +73,11 @@ namespace TaskScheduler
                             if (tb != null)
                             {
                                 var logs = GeocachingAPI.GetTrackableLogs(token, tb.Code);
+                                var tbTravel = GeocachingAPI.GetTrackableTravel(token, tb.Code);
                                 if (logs != null)
                                 {
                                     //update tb
-                                    DataSupport.Instance.AddTrackable(tb, logs);
+                                    DataSupport.Instance.AddTrackable(tb, logs, tbTravel);
                                     _tbCount++;
                                 }
                             }
@@ -84,13 +85,13 @@ namespace TaskScheduler
                     }
                 }
 
-                Details = string.Format("C:{0} T:{1}", activeCode, _tbCount);
+                Details = string.Format("C:{0} T:{1}", activeCode??"", _tbCount);
                 ServiceInfo.ErrorInLastRun = false;
             }
             catch (Exception e)
             {
                 ServiceInfo.ErrorInLastRun = true;
-                Details = string.Format("{0} - {1}", activeCode, e.Message);
+                Details = string.Format("{0} - {1}", activeCode??"", e.Message);
             }
         }
     }

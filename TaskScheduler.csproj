@@ -67,6 +67,13 @@
     <Compile Include="FormMain.Designer.cs">
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="Gavaghan.Geodesy\Angle.cs" />
+    <Compile Include="Gavaghan.Geodesy\Ellipsoid.cs" />
+    <Compile Include="Gavaghan.Geodesy\GeodeticCalculator.cs" />
+    <Compile Include="Gavaghan.Geodesy\GeodeticCurve.cs" />
+    <Compile Include="Gavaghan.Geodesy\GeodeticMeasurement.cs" />
+    <Compile Include="Gavaghan.Geodesy\GlobalCoordinates.cs" />
+    <Compile Include="Gavaghan.Geodesy\GlobalPosition.cs" />
     <Compile Include="GcComAccounts.cs" />
     <Compile Include="GCComDataSupport.cs" />
     <Compile Include="GCEuDataSupport.cs" />
