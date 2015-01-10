@@ -144,7 +144,7 @@ namespace TaskScheduler
                     }
                     if (l.LoggedBy != null)
                     {
-                        AddMember(db, l.LoggedBy);
+                        //AddMember(db, l.LoggedBy);
                     }
                 }
                 if (db.Fetch<long>("SELECT ID FROM GCComTrackable WHERE ID=@0", tbData.ID).Count == 0)
@@ -157,11 +157,11 @@ namespace TaskScheduler
                 }
                 if (tb.OriginalOwner != null)
                 {
-                    AddMember(db, tb.OriginalOwner);
+                    //AddMember(db, tb.OriginalOwner);
                 }
                 if (tb.CurrentOwner != null)
                 {
-                    AddMember(db, tb.CurrentOwner);
+                    //AddMember(db, tb.CurrentOwner);
                 }
             }
         }
