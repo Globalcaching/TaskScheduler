@@ -141,6 +141,10 @@ namespace TaskScheduler
                     {
                         result = resp.Trackables[0];
                     }
+                    else
+                    {
+                        GCEuDataSupport.Instance.DeleteTrackable(tb);
+                    }
                 }
             }
             catch

@@ -53,6 +53,19 @@ namespace TaskScheduler
             return new PetaPoco.Database(GCEuDataConnectionString, "System.Data.SqlClient");
         }
 
+        public void DeleteTrackable(string tb)
+        {
+            using (PetaPoco.Database db = GetGCEuDataDatabase())
+            {
+                List<int> grps = db.Fetch<int>("select GroupID from GCEuTrackable where Code=@0", tb);
+                db.Execute("delete from GCEuTrackable where Code=@0", tb);
+                foreach (int g in grps)
+                {
+                    db.Execute(string.Format("update GCEuTrackableGroup set TrackableCount = (select count(1) from GCEuTrackable where GroupID={0}) where ID={0}", g));
+                }
+            }
+        }
+
         public void AddTrackable(Trackable tb, List<TrackableLog> logs, TrackableTravel[] tl)
         {
             using (PetaPoco.Database db = GetGCEuDataDatabase())
