@@ -157,6 +157,7 @@
     <Compile Include="TaskBase.cs" />
     <Compile Include="TaskDevelopment.cs" />
     <Compile Include="TaskGeocacheImages.cs" />
+    <Compile Include="TaskMacroDataCleanup.cs" />
     <Compile Include="TaskMostRecentLogs.cs" />
     <Compile Include="TaskPingSite.cs" />
     <Compile Include="TaskPocketQuery.cs" />

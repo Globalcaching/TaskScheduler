@@ -22,12 +22,29 @@ namespace TaskScheduler
         {
             try
             {
+                //addMacroDataTables();
                 //updatePublisheddate();
-                clearQueue();
+                //clearQueue();
             }
             catch (Exception e)
             {
                 Details = e.Message;
+            }
+        }
+
+        private void addMacroDataTables()
+        {
+            using (var db = GCEuDataSupport.Instance.GetGCEuDataDatabase())
+            {
+                var tbil = db.Fetch<string>("select TableName from GCEuMacroData.dbo.TableCreationInfo");
+                var tables = db.Fetch<string>("SELECT name FROM GCEuMacroData.sys.tables WHERE name like 'macro_%' or name like 'LiveAPIDownload_%'");
+                foreach (var t in tables)
+                {
+                    if (!tbil.Contains(t))
+                    {
+                        db.Execute("insert into GCEuMacroData.dbo.TableCreationInfo (TableName, Created) values (@0, @1)", t, DateTime.Now);
+                    }
+                }
             }
         }
 
