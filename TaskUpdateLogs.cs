@@ -120,13 +120,21 @@ namespace TaskScheduler
                 if (!string.IsNullOrEmpty(activeCode) && activeId>0)
                 {
                     string token = GeocachingAPI.Instance.GetServiceToken(ref _tokenAccountIndex);
-                    DateTime dt = new DateTime(2000, 1, 1); //for now!
+                    DateTime dt;
+                    if (isScheduledCache)
+                    {
+                        dt = new DateTime(2000, 1, 1);
+                    }
+                    else
+                    {
+                        dt = DateTime.Now.AddMonths(-3);
+                    }
                     if (token.Length > 0)
                     {
                         //update
                         if (getAllLogs)
                         {
-                            List<Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheLog> logs = GeocachingAPI.GetLogsOfGeocache(token, activeCode, dt);
+                            List<Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheLog> logs = GeocachingAPI.GetLogsOfGeocache(token, activeCode);
                             if (logs != null)
                             {
                                 DataSupport.Instance.AddLogs(activeId, logs.ToArray(), true, dt);

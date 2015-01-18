@@ -315,7 +315,7 @@ namespace TaskScheduler
                         }
                     }
                 }
-                if (l.UTCCreateDate >= updateOnlyAfter || l.VisitDate >= updateOnlyAfter)
+                if (l.UTCCreateDate >= updateOnlyAfter || l.VisitDate >= updateOnlyAfter || !currentLogIds.Contains(l.ID))
                 {
                     if (AddLog(db, geocacheId, l, currentLogIds, currentLogImageIds))
                     {

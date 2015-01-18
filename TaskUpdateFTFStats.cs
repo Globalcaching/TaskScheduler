@@ -29,93 +29,9 @@ namespace TaskScheduler
         {
             try
             {
-                using (var db = GCEuDataSupport.Instance.GetGCEuDataDatabase())
-                {
-                    List<GCEuFTFStats> ftfTable = new List<GCEuFTFStats>();
-                    List<UserInfo> allGeocaches = db.Fetch<UserInfo>(@"select FTFUserID, STFUserID, TTFUserID, FTFAtDate, STFAtDate, TTFAtDate from GCEuGeocache where FTFUserID is not null or STFUserID is not null or TTFUserID is not null");
+                updateFTFStats();
+                updateFoundRankingStats();
 
-                    //
-                    //ranking over all years
-                    //
-                    ftfTable.Clear();
-                    foreach (var gcInfo in allGeocaches)
-                    {
-                        if (gcInfo.FTFUserID!=null)
-                        {
-                            GCEuFTFStats rec = ftfTable.Where(x => x.UserID == gcInfo.FTFUserID).FirstOrDefault();
-                            if (rec == null)
-                            {
-                                rec = new GCEuFTFStats() { UserID = (long)gcInfo.FTFUserID, Jaar = null };
-                                ftfTable.Add(rec);
-                            }
-                            rec.FTFCount++;
-                        }
-                        if (gcInfo.STFUserID != null)
-                        {
-                            GCEuFTFStats rec = ftfTable.Where(x => x.UserID == gcInfo.STFUserID).FirstOrDefault();
-                            if (rec == null)
-                            {
-                                rec = new GCEuFTFStats() { UserID = (long)gcInfo.STFUserID, Jaar = null };
-                                ftfTable.Add(rec);
-                            }
-                            rec.STFCount++;
-                        }
-                        if (gcInfo.TTFUserID != null)
-                        {
-                            GCEuFTFStats rec = ftfTable.Where(x => x.UserID == gcInfo.TTFUserID).FirstOrDefault();
-                            if (rec == null)
-                            {
-                                rec = new GCEuFTFStats() { UserID = (long)gcInfo.TTFUserID, Jaar = null };
-                                ftfTable.Add(rec);
-                            }
-                            rec.TTFCount++;
-                        }
-                    }
-                    updateFTFTable(db, ftfTable, null);
-
-                    //
-                    //ranking over all years
-                    //
-                    for (int jaar = 2000; jaar <= DateTime.Now.Year; jaar++)
-                    {
-                        ftfTable.Clear();
-                        foreach (var gcInfo in allGeocaches)
-                        {
-                            if (gcInfo.FTFUserID != null && gcInfo.FTFAtDate.HasValue && gcInfo.FTFAtDate.Value.Year==jaar)
-                            {
-                                GCEuFTFStats rec = ftfTable.Where(x => x.UserID == gcInfo.FTFUserID).FirstOrDefault();
-                                if (rec == null)
-                                {
-                                    rec = new GCEuFTFStats() { UserID = (long)gcInfo.FTFUserID, Jaar = jaar };
-                                    ftfTable.Add(rec);
-                                }
-                                rec.FTFCount++;
-                            }
-                            if (gcInfo.STFUserID != null && gcInfo.STFAtDate.HasValue && gcInfo.STFAtDate.Value.Year == jaar)
-                            {
-                                GCEuFTFStats rec = ftfTable.Where(x => x.UserID == gcInfo.STFUserID).FirstOrDefault();
-                                if (rec == null)
-                                {
-                                    rec = new GCEuFTFStats() { UserID = (long)gcInfo.STFUserID, Jaar = jaar };
-                                    ftfTable.Add(rec);
-                                }
-                                rec.STFCount++;
-                            }
-                            if (gcInfo.TTFUserID != null && gcInfo.TTFAtDate.HasValue && gcInfo.TTFAtDate.Value.Year == jaar)
-                            {
-                                GCEuFTFStats rec = ftfTable.Where(x => x.UserID == gcInfo.TTFUserID).FirstOrDefault();
-                                if (rec == null)
-                                {
-                                    rec = new GCEuFTFStats() { UserID = (long)gcInfo.TTFUserID, Jaar = jaar };
-                                    ftfTable.Add(rec);
-                                }
-                                rec.TTFCount++;
-                            }
-                        }
-                        updateFTFTable(db, ftfTable, jaar);
-
-                    }
-                }
                 Details = "OK";
                 ServiceInfo.ErrorInLastRun = false;
             }
@@ -123,6 +39,150 @@ namespace TaskScheduler
             {
                 Details = e.Message;
                 ServiceInfo.ErrorInLastRun = true;
+            }
+        }
+
+        private void updateFoundRankingStats()
+        {
+            using (var db = GCEuDataSupport.Instance.GetGCEuDataDatabase())
+            {
+                db.CommandTimeout = 180;
+
+                int startYear = DateTime.Now.AddMonths(-3).Year;
+                var countries = new int[] { 141, 4, 8 };
+                for (int i = startYear; i <= DateTime.Now.Year; i++)
+                {
+                    foreach (var c in countries)
+                    {
+                        //we get the current ranking and the new ranking
+                        //foreach new ranking, we compare with the new
+                        //if changed, we add or update
+                        var currentRanking = db.Fetch<GCEuFoundsRanking>("where RankYear=@0 and CountryID=@1", i, c);
+                        var newRanking = db.Fetch<GCEuFoundsRanking>("select b.FinderId as GCComUserID, ROW_NUMBER() OVER (order by b.Founds desc, FinderId desc) as Ranking, RankYear=@0, CountryID=@1, b.Founds from (select FinderId, count(1) as Founds from GCComData.dbo.GCComGeocacheLog with (nolock) inner join GCComData.dbo.GCComGeocache with (nolock) on GCComGeocacheLog.CacheCode=GCComGeocache.Code where YEAR(VisitDate)=@2 and WptLogTypeId in (2, 10, 11) and GCComGeocache.CountryID=@3 group by finderid) as b", i, c, i, c);
+                        compareAndUpdateFoundsRanking(db, currentRanking, newRanking);
+                    }
+                }
+                foreach (var c in countries)
+                {
+                    var currentRanking = db.Fetch<GCEuFoundsRanking>("where RankYear=0 and CountryID=@0", c);
+                    var newRanking = db.Fetch<GCEuFoundsRanking>("select b.FinderId as GCComUserID, ROW_NUMBER() OVER (order by b.Founds desc, FinderId desc) as Ranking, RankYear=0, CountryID=@0, b.Founds from (select FinderId, count(1) as Founds from GCComData.dbo.GCComGeocacheLog with (nolock) inner join GCComData.dbo.GCComGeocache with (nolock) on GCComGeocacheLog.CacheCode=GCComGeocache.Code where WptLogTypeId in (2, 10, 11) and GCComGeocache.CountryID=@1 group by finderid) as b", c, c);
+                    compareAndUpdateFoundsRanking(db, currentRanking, newRanking);
+                }
+            }
+        }
+
+        private void compareAndUpdateFoundsRanking(PetaPoco.Database db, List<GCEuFoundsRanking> currentRanking, List<GCEuFoundsRanking> newRanking)
+        {
+            foreach (var nr in newRanking)
+            {
+                var cr = (from a in currentRanking where a.GCComUserID == nr.GCComUserID select a).FirstOrDefault();
+                if (cr == null)
+                {
+                    db.Insert(nr);
+                }
+                else
+                {
+                    if (nr.Ranking != cr.Ranking || nr.Founds != cr.Founds)
+                    {
+                        db.Execute("update GCEuFoundsRanking set Ranking=@0, Founds=@1 where RankYear=@2 and CountryID=@3", nr.Ranking, nr.Founds, nr.RankYear, nr.CountryID);
+                    }
+                    currentRanking.Remove(cr);
+                }
+            }
+            foreach (var cr in currentRanking)
+            {
+                db.Execute("delete from GCEuFoundsRanking where RankYear=@0 and CountryID=@1 and GCComUserID=@2", cr.RankYear, cr.CountryID, cr.GCComUserID);
+            }
+        }
+
+
+        private void updateFTFStats()
+        {
+            using (var db = GCEuDataSupport.Instance.GetGCEuDataDatabase())
+            {
+                List<GCEuFTFStats> ftfTable = new List<GCEuFTFStats>();
+                List<UserInfo> allGeocaches = db.Fetch<UserInfo>(@"select FTFUserID, STFUserID, TTFUserID, FTFAtDate, STFAtDate, TTFAtDate from GCEuGeocache where FTFUserID is not null or STFUserID is not null or TTFUserID is not null");
+
+                //
+                //ranking over all years
+                //
+                ftfTable.Clear();
+                foreach (var gcInfo in allGeocaches)
+                {
+                    if (gcInfo.FTFUserID != null)
+                    {
+                        GCEuFTFStats rec = ftfTable.Where(x => x.UserID == gcInfo.FTFUserID).FirstOrDefault();
+                        if (rec == null)
+                        {
+                            rec = new GCEuFTFStats() { UserID = (long)gcInfo.FTFUserID, Jaar = null };
+                            ftfTable.Add(rec);
+                        }
+                        rec.FTFCount++;
+                    }
+                    if (gcInfo.STFUserID != null)
+                    {
+                        GCEuFTFStats rec = ftfTable.Where(x => x.UserID == gcInfo.STFUserID).FirstOrDefault();
+                        if (rec == null)
+                        {
+                            rec = new GCEuFTFStats() { UserID = (long)gcInfo.STFUserID, Jaar = null };
+                            ftfTable.Add(rec);
+                        }
+                        rec.STFCount++;
+                    }
+                    if (gcInfo.TTFUserID != null)
+                    {
+                        GCEuFTFStats rec = ftfTable.Where(x => x.UserID == gcInfo.TTFUserID).FirstOrDefault();
+                        if (rec == null)
+                        {
+                            rec = new GCEuFTFStats() { UserID = (long)gcInfo.TTFUserID, Jaar = null };
+                            ftfTable.Add(rec);
+                        }
+                        rec.TTFCount++;
+                    }
+                }
+                updateFTFTable(db, ftfTable, null);
+
+                //
+                //ranking over all years
+                //
+                for (int jaar = 2000; jaar <= DateTime.Now.Year; jaar++)
+                {
+                    ftfTable.Clear();
+                    foreach (var gcInfo in allGeocaches)
+                    {
+                        if (gcInfo.FTFUserID != null && gcInfo.FTFAtDate.HasValue && gcInfo.FTFAtDate.Value.Year == jaar)
+                        {
+                            GCEuFTFStats rec = ftfTable.Where(x => x.UserID == gcInfo.FTFUserID).FirstOrDefault();
+                            if (rec == null)
+                            {
+                                rec = new GCEuFTFStats() { UserID = (long)gcInfo.FTFUserID, Jaar = jaar };
+                                ftfTable.Add(rec);
+                            }
+                            rec.FTFCount++;
+                        }
+                        if (gcInfo.STFUserID != null && gcInfo.STFAtDate.HasValue && gcInfo.STFAtDate.Value.Year == jaar)
+                        {
+                            GCEuFTFStats rec = ftfTable.Where(x => x.UserID == gcInfo.STFUserID).FirstOrDefault();
+                            if (rec == null)
+                            {
+                                rec = new GCEuFTFStats() { UserID = (long)gcInfo.STFUserID, Jaar = jaar };
+                                ftfTable.Add(rec);
+                            }
+                            rec.STFCount++;
+                        }
+                        if (gcInfo.TTFUserID != null && gcInfo.TTFAtDate.HasValue && gcInfo.TTFAtDate.Value.Year == jaar)
+                        {
+                            GCEuFTFStats rec = ftfTable.Where(x => x.UserID == gcInfo.TTFUserID).FirstOrDefault();
+                            if (rec == null)
+                            {
+                                rec = new GCEuFTFStats() { UserID = (long)gcInfo.TTFUserID, Jaar = jaar };
+                                ftfTable.Add(rec);
+                            }
+                            rec.TTFCount++;
+                        }
+                    }
+                    updateFTFTable(db, ftfTable, jaar);
+                }
             }
         }
 

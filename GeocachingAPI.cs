@@ -295,12 +295,6 @@ namespace TaskScheduler
 
         public static List<Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheLog> GetLogsOfGeocache(string token, string wp)
         {
-            DateTime onlyUpdateAfter = DateTime.Now.AddMonths(-3);
-            return GetLogsOfGeocache(token, wp, onlyUpdateAfter);
-        }
-
-        public static List<Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheLog> GetLogsOfGeocache(string token, string wp, DateTime onlyUpdateAfter)
-        {
             int pageSize = 1000;
             int callDelay = 2100;
 

@@ -101,6 +101,7 @@
     <Compile Include="Models\GCEuComUserNameChange.cs" />
     <Compile Include="Models\GCEuCoordCheckAttempt.cs" />
     <Compile Include="Models\GCEuCoordCheckCode.cs" />
+    <Compile Include="Models\GCEuFoundsRanking.cs" />
     <Compile Include="Models\GCEuFTFStats.cs" />
     <Compile Include="Models\GCEuGeocache.cs" />
     <Compile Include="Models\GCEuTrackable.cs" />

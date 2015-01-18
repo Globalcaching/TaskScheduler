@@ -22,6 +22,7 @@ namespace TaskScheduler
         {
             try
             {
+                //buildFoundRankings();
                 //addMacroDataTables();
                 //updatePublisheddate();
                 //clearQueue();
@@ -29,6 +30,28 @@ namespace TaskScheduler
             catch (Exception e)
             {
                 Details = e.Message;
+            }
+        }
+
+        private void buildFoundRankings()
+        {
+            using (var db = GCEuDataSupport.Instance.GetGCEuDataDatabase())
+            {
+                db.CommandTimeout = 180;
+
+                db.Execute("truncate table GCEuFoundsRanking");
+                var countries = new int[] { 141, 4, 8};
+                for (int i = 2001; i < 2016; i++)
+                {
+                    foreach (var c in countries)
+                    {
+                        db.Execute("insert into GCEuFoundsRanking (GCComUserID, Ranking, RankYear, CountryID, Founds) select b.FinderId as GCComUserID, ROW_NUMBER() OVER (order by b.Founds desc, FinderId desc) as Ranking, RankYear=@0, CountryID=@1, b.Founds from (select FinderId, count(1) as Founds from GCComData.dbo.GCComGeocacheLog with (nolock) inner join GCComData.dbo.GCComGeocache with (nolock) on GCComGeocacheLog.CacheCode=GCComGeocache.Code where YEAR(VisitDate)=@2 and WptLogTypeId in (2, 10, 11) and GCComGeocache.CountryID=@3 group by finderid) as b", i, c, i, c);
+                    }
+                }
+                foreach (var c in countries)
+                {
+                    db.Execute("insert into GCEuFoundsRanking (GCComUserID, Ranking, RankYear, CountryID, Founds) select b.FinderId as GCComUserID, ROW_NUMBER() OVER (order by b.Founds desc, FinderId desc) as Ranking, RankYear=0, CountryID=@0, b.Founds from (select FinderId, count(1) as Founds from GCComData.dbo.GCComGeocacheLog with (nolock) inner join GCComData.dbo.GCComGeocache with (nolock) on GCComGeocacheLog.CacheCode=GCComGeocache.Code where WptLogTypeId in (2, 10, 11) and GCComGeocache.CountryID=@1 group by finderid) as b", c, c);
+                }
             }
         }
 
