@@ -48,8 +48,10 @@ namespace TaskScheduler
             {
                 db.CommandTimeout = 180;
 
-                int startYear = DateTime.Now.AddMonths(-3).Year;
+                int startYear = DateTime.Now.AddMonths(-2).Year;
                 var countries = new int[] { 141, 4, 8 };
+                //takes too long
+                /*
                 for (int i = startYear; i <= DateTime.Now.Year; i++)
                 {
                     foreach (var c in countries)
@@ -68,6 +70,23 @@ namespace TaskScheduler
                     var newRanking = db.Fetch<GCEuFoundsRanking>("select b.FinderId as GCComUserID, ROW_NUMBER() OVER (order by b.Founds desc, FinderId desc) as Ranking, RankYear=0, CountryID=@0, b.Founds from (select FinderId, count(1) as Founds from GCComData.dbo.GCComGeocacheLog with (nolock) inner join GCComData.dbo.GCComGeocache with (nolock) on GCComGeocacheLog.CacheCode=GCComGeocache.Code where WptLogTypeId in (2, 10, 11) and GCComGeocache.CountryID=@1 group by finderid) as b", c, c);
                     compareAndUpdateFoundsRanking(db, currentRanking, newRanking);
                 }
+                 * */
+                for (int i = startYear; i <= DateTime.Now.Year; i++)
+                {
+                    foreach (var c in countries)
+                    {
+                        //we get the current ranking and the new ranking
+                        //foreach new ranking, we compare with the new
+                        //if changed, we add or update
+                        db.Execute("delete from GCEuFoundsRanking where RankYear=@0 and CountryID=@1", i, c);
+                        db.Execute("insert into GCEuFoundsRanking (GCComUserID, Ranking, RankYear, CountryID, Founds) select b.FinderId as GCComUserID, ROW_NUMBER() OVER (order by b.Founds desc, FinderId desc) as Ranking, RankYear=@0, CountryID=@1, b.Founds from (select FinderId, count(1) as Founds from GCComData.dbo.GCComGeocacheLog with (nolock) inner join GCComData.dbo.GCComGeocache with (nolock) on GCComGeocacheLog.CacheCode=GCComGeocache.Code where YEAR(VisitDate)=@2 and WptLogTypeId in (2, 10, 11) and GCComGeocache.CountryID=@3 group by finderid) as b", i, c, i, c);
+                    }
+                }
+                foreach (var c in countries)
+                {
+                    db.Execute("delete from GCEuFoundsRanking where RankYear=0 and CountryID=@0", c);
+                    db.Execute("insert into GCEuFoundsRanking (GCComUserID, Ranking, RankYear, CountryID, Founds) select b.FinderId as GCComUserID, ROW_NUMBER() OVER (order by b.Founds desc, FinderId desc) as Ranking, RankYear=0, CountryID=@0, b.Founds from (select FinderId, count(1) as Founds from GCComData.dbo.GCComGeocacheLog with (nolock) inner join GCComData.dbo.GCComGeocache with (nolock) on GCComGeocacheLog.CacheCode=GCComGeocache.Code where WptLogTypeId in (2, 10, 11) and GCComGeocache.CountryID=@1 group by finderid) as b", c, c);
+                }
             }
         }
 
@@ -84,7 +103,7 @@ namespace TaskScheduler
                 {
                     if (nr.Ranking != cr.Ranking || nr.Founds != cr.Founds)
                     {
-                        db.Execute("update GCEuFoundsRanking set Ranking=@0, Founds=@1 where RankYear=@2 and CountryID=@3", nr.Ranking, nr.Founds, nr.RankYear, nr.CountryID);
+                        db.Execute("update GCEuFoundsRanking set Ranking=@0, Founds=@1 where RankYear=@2 and CountryID=@3 and GCComUserID=@4", nr.Ranking, nr.Founds, nr.RankYear, nr.CountryID, nr.GCComUserID);
                     }
                     currentRanking.Remove(cr);
                 }
