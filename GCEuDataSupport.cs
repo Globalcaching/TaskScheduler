@@ -112,13 +112,17 @@ namespace TaskScheduler
                 {
                     var gcData = GCEuGeocache.From(gc);
                     gcData.FoundCount = 0;
-                    if (gc.Latitude!=null && gc.Longitude!=null)
+                    if (gc.Latitude != null && gc.Longitude != null)
                     {
                         gcData.City = Helper.GetCityName((double)gc.Latitude, (double)gc.Longitude);
                         gcData.Municipality = Helper.PointInMunicipality((double)gc.Latitude, (double)gc.Longitude);
                     }
                     gcData.PublishedAtDate = gc.UTCPlaceDate;
                     db.Insert(gcData);
+                }
+                else
+                {
+                    db.Execute("update GCEuGeocache set FavPer100Found = CASE WHEN PMFoundCount=0 THEN 0 ELSE 100*CONVERT(FLOAT,(select GCComGeocache.FavoritePoints from GCComData.dbo.GCComGeocache where GCComGeocache.ID=GCEuGeocache.ID))/CONVERT(FLOAT,PMFoundCount) END where ID=@0", gc.ID);
                 }
             }
         }
