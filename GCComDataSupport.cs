@@ -287,7 +287,9 @@ namespace TaskScheduler
             DateTime? mostRecentFoundDate = DateTime.MinValue;
             DateTime? mostRecentArchivedDate = DateTime.MinValue;
             int foundCount = 0;
+            int pmfoundCount = 0;
             int incFoundCount = 0;
+            int incPMFoundCount = 0;
             DateTime? publishedDate = null;
             List<long> currentLogIds = db.Fetch<long>("select ID from GCComGeocacheLog with (nolock) where GeocacheID=@0", geocacheId);
             List<string> currentLogImageIds = db.Fetch<string>("select GCComGeocacheLogImage.Url from GCComGeocacheLogImage with (nolock) inner join GCComGeocacheLog with (nolock) on GCComGeocacheLogImage.LogID = GCComGeocacheLog.ID where GCComGeocacheLog.GeocacheID=@0", geocacheId);
@@ -298,6 +300,10 @@ namespace TaskScheduler
                     if (FoundLogTypeIds.Contains(l.LogType.WptLogTypeId))
                     {
                         foundCount++;
+                        if (l.Finder != null && l.Finder.MemberType != null && l.Finder.MemberType.MemberTypeId > 1)
+                        {
+                            pmfoundCount++;
+                        }
                         if (mostRecentFoundDate < l.VisitDate)
                         {
                             mostRecentFoundDate = l.VisitDate;
@@ -320,6 +326,10 @@ namespace TaskScheduler
                     if (AddLog(db, geocacheId, l, currentLogIds, currentLogImageIds))
                     {
                         incFoundCount++;
+                        if (l.Finder != null && l.Finder.MemberType != null && l.Finder.MemberType.MemberTypeId > 1)
+                        {
+                            incPMFoundCount++;
+                        }
                     }
                 }
                 else if (l.Finder != null) //still update member
@@ -345,13 +355,13 @@ namespace TaskScheduler
                         db.Execute("delete from GCComGeocacheLog where ID=@0", l);
                     }
                 }
-                GCEuDataSupport.Instance.SetFoundCountForGeocache(geocacheId, favPoints, logImgCount, foundCount, publishedDate, mostRecentFoundDate == DateTime.MinValue ? null : mostRecentFoundDate, mostRecentArchivedDate == DateTime.MinValue ? null : mostRecentArchivedDate);
+                GCEuDataSupport.Instance.SetFoundCountForGeocache(geocacheId, favPoints, logImgCount, foundCount, publishedDate, mostRecentFoundDate == DateTime.MinValue ? null : mostRecentFoundDate, mostRecentArchivedDate == DateTime.MinValue ? null : mostRecentArchivedDate, pmfoundCount);
             }
             else
             {
                 if (incFoundCount > 0)
                 {
-                    GCEuDataSupport.Instance.AddFoundCountForGeocache(geocacheId, favPoints, logImgCount, incFoundCount, mostRecentFoundDate == DateTime.MinValue ? null : mostRecentFoundDate, mostRecentArchivedDate == DateTime.MinValue ? null : mostRecentArchivedDate);
+                    GCEuDataSupport.Instance.AddFoundCountForGeocache(geocacheId, favPoints, logImgCount, incFoundCount, mostRecentFoundDate == DateTime.MinValue ? null : mostRecentFoundDate, mostRecentArchivedDate == DateTime.MinValue ? null : mostRecentArchivedDate, incPMFoundCount);
                 }
             }
         }

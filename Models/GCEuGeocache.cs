@@ -30,6 +30,7 @@ namespace TaskScheduler.Models
         public int FTFFoundCount { get; set; }
         public DateTime? MostRecentFoundDate { get; set; }
         public DateTime? MostRecentArchivedDate { get; set; }
+        public int PMFoundCount { get; set; }
         
         public static GCEuGeocache From(Geocache src)
         {
@@ -42,6 +43,7 @@ namespace TaskScheduler.Models
             result.Municipality = null;
             result.City = null;
             result.FoundCount = 0;
+            result.PMFoundCount = 0;
             result.LogImageCount = 0;
             result.Distance = null;
             result.DistanceChecked = false;
