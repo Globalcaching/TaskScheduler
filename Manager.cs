@@ -43,6 +43,7 @@ namespace TaskScheduler
                 Tasks.Add(new TaskMostRecentLogs(this));
                 Tasks.Add(new TaskWalkWaypoints(this));
                 Tasks.Add(new TaskUpdateLogs(this));
+                Tasks.Add(new TaskUpdateLastLogs(this));
                 Tasks.Add(new TaskPocketQuery(this));
                 Tasks.Add(new TaskUpdateStatus(this));
                 Tasks.Add(new TaskUpdateFTFStats(this));

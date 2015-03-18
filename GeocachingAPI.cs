@@ -295,8 +295,8 @@ namespace TaskScheduler
 
         public static List<Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheLog> GetLogsOfGeocache(string token, string wp)
         {
-            int pageSize = 1000;
-            int callDelay = 2100;
+            int pageSize = 30;
+            int callDelay = 4000;
 
             long prevCollAt;
             long nextCollAt;
@@ -436,6 +436,28 @@ namespace TaskScheduler
             return result;
         }
 
+
+        public static GetUserProfileResponse GetUserProfile(string token)
+        {
+            GetUserProfileResponse result = null;
+            LiveClient lc = GetLiveClient();
+            try
+            {
+                var req = new GetYourUserProfileRequest();
+                req.AccessToken = token;
+                req.ProfileOptions = new Tucson.Geocaching.WCF.API.Geocaching1.Types.UserProfileOptions();
+                req.DeviceInfo = new Tucson.Geocaching.WCF.API.Geocaching1.Types.DeviceData();
+                req.DeviceInfo.DeviceName = "globalcaching.eu";
+                req.DeviceInfo.ApplicationSoftwareVersion = "V3.0.0.0";
+                req.DeviceInfo.DeviceUniqueId = "internal";
+                result = lc.GetYourUserProfile(req);
+            }
+            catch
+            {
+            }
+            lc.Close();
+            return result;
+        }
     }
 
 }

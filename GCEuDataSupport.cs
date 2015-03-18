@@ -189,7 +189,7 @@ namespace TaskScheduler
         {
             using (PetaPoco.Database db = GetGCEuDataDatabase())
             {
-                db.Execute("update GCEuGeocache set FoundCount = FoundCount + @0, PMFoundCount = PMFoundCount + @1 where ID=@2", incrementValue, pmIncrementValue, geocacheId);
+                db.Execute("update GCEuGeocache set FoundCount = FoundCount + @0, PMFoundCount = PMFoundCount + @1, LogImageCount = @2 where ID=@3", incrementValue, pmIncrementValue, LogImageCount, geocacheId);
                 db.Execute("update GCEuGeocache set FavPer100Found = CASE WHEN PMFoundCount=0 THEN 0 ELSE 100*CONVERT(FLOAT,@0)/CONVERT(FLOAT,PMFoundCount) END, LogImagePer100Found = CASE WHEN FoundCount=0 THEN 0 ELSE 100*CONVERT(FLOAT,@1)/CONVERT(FLOAT,FoundCount) END where ID=@2", FavoriteCount, LogImageCount, geocacheId);
                 if (mostRecentFoundDate != null)
                 {
