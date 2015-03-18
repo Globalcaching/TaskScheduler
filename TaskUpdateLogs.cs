@@ -57,7 +57,6 @@ namespace TaskScheduler
             string activeCode = "";
             long activeId = 0;
             bool isScheduledCache = false;
-            bool getAllLogs = true;
             long lastId = 0;
             List<long> gcidList;
             try
@@ -66,6 +65,12 @@ namespace TaskScheduler
                 using (var db = new PetaPoco.Database(Manager.SchedulerConnectionString, "System.Data.SqlClient"))
                 {
                     activeCode = GetScheduledWaypoint();
+                    if (!string.IsNullOrEmpty(activeCode))
+                    {
+                        isScheduledCache = true;
+                        GeocacheInfo gi = db.FirstOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where Code=@0", GCComDataSupport.GeocachingDatabaseName), activeCode);
+                        activeId = gi.ID;
+                    }
                     if (!isScheduledCache)
                     {
                         gcidList = db.Fetch<long>("SELECT LastGeocacheID FROM TaskUpdateLogs");
@@ -112,21 +117,10 @@ namespace TaskScheduler
                     if (token.Length > 0)
                     {
                         //update
-                        if (getAllLogs)
+                        List<Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheLog> logs = GeocachingAPI.GetLogsOfGeocache(token, activeCode);
+                        if (logs != null)
                         {
-                            List<Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheLog> logs = GeocachingAPI.GetLogsOfGeocache(token, activeCode);
-                            if (logs != null)
-                            {
-                                DataSupport.Instance.AddLogs(activeId, logs.ToArray(), true, dt);
-                            }
-                        }
-                        else
-                        {
-                            List<Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheLog> logs = GeocachingAPI.GetLogsOfGeocache(token, activeCode, 30);
-                            if (logs != null)
-                            {
-                                DataSupport.Instance.AddLogs(activeId, logs.ToArray(), false, dt);
-                            }
+                            DataSupport.Instance.AddLogs(activeId, logs.ToArray(), true, dt);
                         }
 
                         _wpCount++;

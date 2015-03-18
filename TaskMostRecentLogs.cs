@@ -79,18 +79,9 @@ namespace TaskScheduler
                             string code = db.FirstOrDefault<string>("select Code from GCComGeocache where GUID=@0 and (CountryID=141 or CountryID=4 or CountryID=8)", Guid.Parse(guid));
                             if (!string.IsNullOrEmpty(code))
                             {
-                                ScheduledWaypoint swp = db.FirstOrDefault<ScheduledWaypoint>(string.Format("select * from [{0}].[dbo].[ScheduledWaypoint] where Code=@0", Manager.SchedulerDatabase), code);
-                                if (swp == null)
-                                {
-                                    swp = new ScheduledWaypoint();
-                                    swp.Code = code;
-                                    swp.DateAdded = DateTime.Now;
-                                    swp.FullRefresh = false;
-                                    db.Insert(string.Format("[{0}].[dbo].[ScheduledWaypoint]", Manager.SchedulerDatabase), null, false, swp);
-
-                                    _logCount++;
-                                    Details = _logCount.ToString();
-                                }
+                                TaskUpdateLastLogs.AddScheduledWaypoint(code);
+                                _logCount++;
+                                Details = _logCount.ToString();
                             }
                             pos = webPage.IndexOf(string.Format("{0}/profile/?", _geocachingComUrl), pos, StringComparison.OrdinalIgnoreCase);
                         }

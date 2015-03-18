@@ -152,7 +152,7 @@ namespace TaskScheduler
                     }
                 }
 
-                Details = string.Format("C:{0} T:{1} S:{2}", activeCode, _wpCount, _scheduledCount);
+                Details = string.Format("C:{0} T:{1} S:{2} [{3}]", activeCode, _wpCount, _scheduledCount, _availableTokens == null ? 0 : _availableTokens.Count());
                 ServiceInfo.ErrorInLastRun = false;
             }
             catch (Exception e)
@@ -174,13 +174,20 @@ namespace TaskScheduler
                 _tokenAccountIndex = 0;
             }
             _tokenAccountIndex++;
-            if (_tokenAccountIndex >= _availableTokens.Count())
+            if (_availableTokens.Count() > 50)
             {
-                _tokenAccountIndex = 0;
-            }
-            if (_tokenAccountIndex < _availableTokens.Count())
-            {
-                result = _availableTokens[_tokenAccountIndex].LiveAPIToken;
+                if (_tokenAccountIndex >= _availableTokens.Count())
+                {
+                    using (var db = new PetaPoco.Database(GCEuDataSupport.Instance.GCEuDataConnectionString, "System.Data.SqlClient"))
+                    {
+                        _availableTokens = db.Fetch<GCEuLiveAPIHelpers>("");
+                    }
+                    _tokenAccountIndex = 0;
+                }
+                if (_tokenAccountIndex < _availableTokens.Count())
+                {
+                    result = _availableTokens[_tokenAccountIndex].LiveAPIToken;
+                }
             }
             return result;
         }
