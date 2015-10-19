@@ -51,6 +51,7 @@ namespace TaskScheduler
                 Tasks.Add(new TaskGeocacheImages(this));
                 Tasks.Add(new TaskUpdateTrackables(this));
                 Tasks.Add(new TaskMacroDataCleanup(this));
+                Tasks.Add(new TaskCheckDonators(this));
 #if DEBUG
                 Tasks.Add(new TaskDevelopment(this));
 #endif
