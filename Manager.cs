@@ -52,6 +52,8 @@ namespace TaskScheduler
                 Tasks.Add(new TaskUpdateTrackables(this));
                 Tasks.Add(new TaskMacroDataCleanup(this));
                 Tasks.Add(new TaskCheckDonators(this));
+                Tasks.Add(new TaskUpdateBookmarksFromUser(this));
+                Tasks.Add(new TaskUpdateBookmark(this));
 #if DEBUG
                 Tasks.Add(new TaskDevelopment(this));
 #endif

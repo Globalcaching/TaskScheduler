@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using Tucson.Geocaching.WCF.API.Geocaching1.Types;
 
 namespace TaskScheduler.Models
 {
@@ -45,7 +44,7 @@ namespace TaskScheduler.Models
         public string Url { get; set; }
         public DateTime UTCPlaceDate { get; set; }
 
-        public static GCComGeocache From(Geocache src)
+        public static GCComGeocache From(Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache src)
         {
             GCComGeocache result = new GCComGeocache();
             result.ID = src.ID;

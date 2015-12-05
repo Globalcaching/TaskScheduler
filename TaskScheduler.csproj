@@ -84,6 +84,8 @@
     <Compile Include="Live.cs" />
     <Compile Include="Manager.cs" />
     <Compile Include="Models\GCComAttributeType.cs" />
+    <Compile Include="Models\GCComBookmark.cs" />
+    <Compile Include="Models\GCComBookmarkContent.cs" />
     <Compile Include="Models\GCComDataAdditionalWaypoints.cs" />
     <Compile Include="Models\GCComGeocache.cs" />
     <Compile Include="Models\GCComGeocacheAttribute.cs" />
@@ -171,8 +173,10 @@
       <DependentUpon>TaskSettingsBase.cs</DependentUpon>
     </Compile>
     <Compile Include="TaskUpdateFTFStats.cs" />
+    <Compile Include="TaskUpdateBookmark.cs" />
     <Compile Include="TaskUpdateLastLogs.cs" />
     <Compile Include="TaskUpdateLogs.cs" />
+    <Compile Include="TaskUpdateBookmarksFromUser.cs" />
     <Compile Include="TaskUpdateStatus.cs" />
     <Compile Include="TaskUpdateTrackables.cs" />
     <Compile Include="TaskWalkWaypoints.cs" />

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using Tucson.Geocaching.WCF.API.Geocaching1.Types;
 
 namespace TaskScheduler.Models
 {
@@ -31,8 +30,8 @@ namespace TaskScheduler.Models
         public DateTime? MostRecentFoundDate { get; set; }
         public DateTime? MostRecentArchivedDate { get; set; }
         public int PMFoundCount { get; set; }
-        
-        public static GCEuGeocache From(Geocache src)
+
+        public static GCEuGeocache From(Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache src)
         {
             //default values
             GCEuGeocache result = new GCEuGeocache();

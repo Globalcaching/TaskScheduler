@@ -40,7 +40,7 @@ namespace TaskScheduler
             GCEuDataSupport.Instance.AddTrackable(tb, logs, trvls);
         }
 
-        public void AddGeocache(Geocache gc)
+        public void AddGeocache(Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache gc)
         {
             GCEuDataSupport.Instance.AddGeocache(gc);
             GCComDataSupport.Instance.AddGeocache(gc);

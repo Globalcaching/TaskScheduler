@@ -166,7 +166,7 @@ namespace TaskScheduler
             }
         }
 
-        public void AddGeocache(Geocache gc)
+        public void AddGeocache(Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache gc)
         {
             using (PetaPoco.Database db = GetGCComDataDatabase())
             {

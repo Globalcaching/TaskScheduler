@@ -436,16 +436,57 @@ namespace TaskScheduler
             return result;
         }
 
-
-        public static GetUserProfileResponse GetUserProfile(string token)
+        public static BookmarkListEntry[] GetBookmarkListsByUserID(string token, long usrId)
         {
-            GetUserProfileResponse result = null;
+            BookmarkListEntry[] result = null;
+            LiveClient lc = GetLiveClient();
+            try
+            {
+                var resp = lc.GetBookmarkListsByUserID(token, usrId);
+                if (resp.Status.StatusCode == 0)
+                {
+                    result = resp.BookmarkLists;
+                }
+            }
+            catch
+            {
+            }
+            lc.Close();
+            return result;
+        }
+
+        public static BookmarkEntry[] GetBookmarkListByGuid(string token, Guid bmGuid)
+        {
+            BookmarkEntry[] result = null;
+            LiveClient lc = GetLiveClient();
+            try
+            {
+                var req = new GetBookmarkListByGuidRequest();
+                req.AccessToken = token;
+                req.BookmarkListGuid = bmGuid;
+                var resp = lc.GetBookmarkListByGuid(req);
+                if (resp.Status.StatusCode == 0)
+                {
+                    result = resp.BookmarkList;
+                }
+            }
+            catch
+            {
+            }
+            lc.Close();
+            return result;
+        }
+
+
+        public static GetYourUserProfileResponse GetUserProfile(string token)
+        {
+            GetYourUserProfileResponse result = null;
             LiveClient lc = GetLiveClient();
             try
             {
                 var req = new GetYourUserProfileRequest();
                 req.AccessToken = token;
-                req.ProfileOptions = new Tucson.Geocaching.WCF.API.Geocaching1.Types.UserProfileOptions();
+                req.ProfileOptions = new Tucson.Geocaching.WCF.API.Geocaching1.Types.YourUserProfileOptions();
                 req.DeviceInfo = new Tucson.Geocaching.WCF.API.Geocaching1.Types.DeviceData();
                 req.DeviceInfo.DeviceName = "globalcaching.eu";
                 req.DeviceInfo.ApplicationSoftwareVersion = "V3.0.0.0";
