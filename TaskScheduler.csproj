@@ -77,6 +77,7 @@
     <Compile Include="GcComAccounts.cs" />
     <Compile Include="GCComDataSupport.cs" />
     <Compile Include="GCEuDataSupport.cs" />
+    <Compile Include="GCEuMacroDataSupport.cs" />
     <Compile Include="GeocachingAPI.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="LatLon.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="Models\GCComGeocache.cs" />
     <Compile Include="Models\GCComGeocacheAttribute.cs" />
     <Compile Include="Models\GCComGeocacheImage.cs" />
+    <Compile Include="Models\GCComGeocacheLogEx.cs" />
     <Compile Include="Models\GCComGeocacheLog.cs" />
     <Compile Include="Models\GCComGeocacheLogImage.cs" />
     <Compile Include="Models\GCComGeocacheType.cs" />
@@ -103,6 +105,7 @@
     <Compile Include="Models\GCEuComUserNameChange.cs" />
     <Compile Include="Models\GCEuCoordCheckAttempt.cs" />
     <Compile Include="Models\GCEuCoordCheckCode.cs" />
+    <Compile Include="Models\GCEuDownloadLogsStatus.cs" />
     <Compile Include="Models\GCEuFoundsRanking.cs" />
     <Compile Include="Models\GCEuFTFStats.cs" />
     <Compile Include="Models\GCEuGeocache.cs" />
@@ -160,6 +163,7 @@
     <Compile Include="SHP\ShapeFilesManager.cs" />
     <Compile Include="TaskBase.cs" />
     <Compile Include="TaskDevelopment.cs" />
+    <Compile Include="TaskDownloadLogsOnRequest.cs" />
     <Compile Include="TaskGeocacheImages.cs" />
     <Compile Include="TaskMacroDataCleanup.cs" />
     <Compile Include="TaskMostRecentLogs.cs" />

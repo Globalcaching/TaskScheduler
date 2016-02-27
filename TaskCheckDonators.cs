@@ -40,9 +40,9 @@ namespace TaskScheduler
                         body.AppendLine();
                         if (!record.ThankYouSent)
                         {
-                            body.AppendLine("We hebben een donatie mogen ontvangen van. Hartelijk dank daarvoor!");
-                            body.AppendLine("Jouw account heeft de donateursstatus gekregen en hiermee kun je gebruik maken van alle donateursfuncties op globalcaching.eu");
-                            body.AppendLine("De donatiestatus zal voor een jaar gelden en een week voor het verlopen van de einddatum zal er een herinnerings email verstuurd worden.");
+                            body.AppendLine("We hebben van jou een donatie ontvangen. Hartelijk dank daarvoor!");
+                            body.AppendLine("Jouw account heeft inmiddels de donateursstatus gekregen, hiermee kun je gebruik maken van alle donateursfuncties op globalcaching.eu");
+                            body.AppendLine("De donatiestatus geldt een jaar. Een week voor het verlopen van de einddatum zal er een herinnerings email verstuurd worden."); 
                             db.Execute("update GCEuDonations set ThankYouSent=1 where ID=@0", record.ID);
                         }
                         else //if (!record.ReminderSent)

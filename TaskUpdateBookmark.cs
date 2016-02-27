@@ -14,7 +14,6 @@ namespace TaskScheduler
         private int _specialIndex = 0;
         private int _bmCount = 0;
         private int _scheduledCount = 0;
-        private int _tokenAccountIndex = 0;
 
         public class BookmarkInfo
         {

@@ -54,6 +54,7 @@ namespace TaskScheduler
                 Tasks.Add(new TaskCheckDonators(this));
                 Tasks.Add(new TaskUpdateBookmarksFromUser(this));
                 Tasks.Add(new TaskUpdateBookmark(this));
+                Tasks.Add(new TaskDownloadLogsOnRequest(this));
 #if DEBUG
                 Tasks.Add(new TaskDevelopment(this));
 #endif

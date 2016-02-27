@@ -499,6 +499,26 @@ namespace TaskScheduler
             lc.Close();
             return result;
         }
+
+        public static GetUserProfileResponse GetAnotherUsersProfile(string token, long id)
+        {
+            GetUserProfileResponse result = null;
+            LiveClient lc = GetLiveClient();
+            try
+            {
+                var req = new GetAnotherUsersProfileRequest();
+                req.AccessToken = token;
+                req.ProfileOptions = new Tucson.Geocaching.WCF.API.Geocaching1.Types.UserProfileOptions();
+                req.UserID = id;
+                result = lc.GetAnotherUsersProfile(req);
+            }
+            catch
+            {
+            }
+            lc.Close();
+            return result;
+        }
+
     }
 
 }
