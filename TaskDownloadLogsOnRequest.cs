@@ -297,6 +297,12 @@ INCLUDE ( 	[WptLogTypeId],
                         {
                             reqRecord.UserNamesCompleted = string.Format("{0}, {1}", reqRecord.UserNamesCompleted, usrProf.User.UserName);
                         }
+                        reqRecord.UserNameBusy = "";
+                        using (var db = GCEuMacroDataSupport.Instance.GetGCEuMacroDataDatabase())
+                        {
+                            if (IsNewRequest(db, reqRecord)) goto stopthread;
+                            UpdateStatus(db, reqRecord);
+                        }
                     }
                 }
                 finally
