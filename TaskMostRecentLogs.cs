@@ -76,7 +76,7 @@ namespace TaskScheduler
                             first = false;
 
                             string guid = ci.LinkToWp.Substring(ci.LinkToWp.IndexOf('=') + 1);
-                            string code = db.FirstOrDefault<string>("select Code from GCComGeocache where GUID=@0 and (CountryID=141 or CountryID=4 or CountryID=8)", Guid.Parse(guid));
+                            string code = db.FirstOrDefault<string>("select Code from GCComGeocache where GUID=@0 and (CountryID=141 or CountryID=4 or CountryID=8 or StateID=143 or StateID=139 or StateID=144)", Guid.Parse(guid));
                             if (!string.IsNullOrEmpty(code))
                             {
                                 TaskUpdateLastLogs.AddScheduledWaypoint(code);

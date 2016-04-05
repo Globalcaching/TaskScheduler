@@ -27,8 +27,8 @@ namespace TaskScheduler
 
         protected override void ServiceMethod()
         {
-            string activeCode = "";
-            bool isScheduledCache = false;
+            string[] activeCodes = new string[]{ "", "" };
+            bool[] isScheduledCaches = new bool[] { false, false };
             long lastId = 0;
             List<long> gcidList;
             try
@@ -36,86 +36,90 @@ namespace TaskScheduler
                 //first get scheduled
                 using (var db = new PetaPoco.Database(Manager.SchedulerConnectionString, "System.Data.SqlClient"))
                 {
-                    ScheduledWaypoint swp = db.FirstOrDefault<ScheduledWaypoint>("select top 1 * from ScheduledWaypoint where FullRefresh=1");
-                    if (swp != null)
+                    for (int i = 0; i < activeCodes.Length; i++)
                     {
-                        activeCode = swp.Code;
-                        isScheduledCache = true;
+                        ScheduledWaypoint swp = db.FirstOrDefault<ScheduledWaypoint>("select top 1 * from ScheduledWaypoint where FullRefresh=1");
+                        if (swp != null)
+                        {
+                            activeCodes[i] = swp.Code;
+                            isScheduledCaches[i] = true;
 
-                        db.Execute("delete from ScheduledWaypoint where Code=@0", swp.Code);
-                    }
-                    if (!isScheduledCache)
-                    {
-                        gcidList = db.Fetch<long>("SELECT LastGeocacheID FROM TaskWalkWaypoints");
-                        if (gcidList.Count > 0)
-                        {
-                            lastId = gcidList[0];
+                            db.Execute("delete from ScheduledWaypoint where Code=@0", swp.Code);
                         }
-                        GeocacheInfo gi = db.FirstOrDefault<GeocacheInfo>(string.Format("select top 1 GCComGeocache.ID, Code from [{0}].[dbo].[GCComGeocache] inner join [{1}].[dbo].[GCEuGeocache] on GCComGeocache.ID = GCEuGeocache.ID where GCComGeocache.ID>@0 and (Archived=0 or DATEDIFF(DAY,COALESCE(MostRecentArchivedDate, GETDATE()),GETDATE()) < 60) order by GCComGeocache.ID", GCComDataSupport.GeocachingDatabaseName, GCEuDataSupport.GlobalcachingDatabaseName), lastId);
-                        if (gi == null)
+                        if (!isScheduledCaches[i])
                         {
-                            lastId = 0;
-                            gi = db.FirstOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where ID>@0 order by ID", GCComDataSupport.GeocachingDatabaseName), lastId);
-                        }
-                        if (gi != null)
-                        {
-                            activeCode = gi.Code;
-                            lastId = gi.ID;
-
+                            gcidList = db.Fetch<long>("SELECT LastGeocacheID FROM TaskWalkWaypoints");
                             if (gcidList.Count > 0)
                             {
-                                db.Execute("update TaskWalkWaypoints set LastGeocacheID=@0", lastId);
+                                lastId = gcidList[0];
                             }
-                            else
+                            GeocacheInfo gi = db.FirstOrDefault<GeocacheInfo>(string.Format("select top 1 GCComGeocache.ID, Code from [{0}].[dbo].[GCComGeocache] inner join [{1}].[dbo].[GCEuGeocache] on GCComGeocache.ID = GCEuGeocache.ID where GCComGeocache.ID>@0 and (Archived=0 or DATEDIFF(DAY,COALESCE(MostRecentArchivedDate, GETDATE()),GETDATE()) < 60) order by GCComGeocache.ID", GCComDataSupport.GeocachingDatabaseName, GCEuDataSupport.GlobalcachingDatabaseName), lastId);
+                            if (gi == null)
                             {
-                                db.Execute("insert into TaskWalkWaypoints (LastGeocacheID) values (@0)", lastId);
+                                lastId = 0;
+                                gi = db.FirstOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where ID>@0 order by ID", GCComDataSupport.GeocachingDatabaseName), lastId);
                             }
-                        }
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(activeCode))
-                {
-                    //update
-                    string token = GeocachingAPI.Instance.GetServiceToken(ref _tokenAccountIndex);
-                    if (token.Length > 0)
-                    {
-                        Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache gcData = GeocachingAPI.GetGeocache(token, activeCode);
-                        if (gcData != null)
-                        {
-                            if (gcData.CountryID == 4 || gcData.CountryID == 8 || gcData.CountryID == 141)
+                            if (gi != null)
                             {
-                                TaskManager.ResetGeocachingComLiveAPINotAvailableCounter();
-                                DataSupport.Instance.AddGeocache(gcData);
+                                activeCodes[i] = gi.Code;
+                                lastId = gi.ID;
 
-                                //if scheduled, update logs too
-                                if (isScheduledCache)
+                                if (gcidList.Count > 0)
                                 {
-                                    TaskUpdateLogs.AddScheduledWaypoint(activeCode);
-                                    TaskGeocacheImages.AddScheduledWaypoint(activeCode);
+                                    db.Execute("update TaskWalkWaypoints set LastGeocacheID=@0", lastId);
+                                }
+                                else
+                                {
+                                    db.Execute("insert into TaskWalkWaypoints (LastGeocacheID) values (@0)", lastId);
                                 }
                             }
                         }
-                        else
-                        {
-                            TaskManager.IncrementGeocachingComLiveAPINotAvailableCounter();
-                        }
-                    }
-
-                    _wpCount++;
-                    if (isScheduledCache)
-                    {
-                        _scheduledCount++;
                     }
                 }
 
-                Details = string.Format("C:{0} T:{1} S:{2}", activeCode, _wpCount, _scheduledCount);
+                //update
+                string token = GeocachingAPI.Instance.GetServiceToken(ref _tokenAccountIndex);
+                if (token.Length > 0)
+                {
+                    var gcData = GeocachingAPI.GetGeocaches(token, activeCodes);
+                    if (gcData != null)
+                    {
+                        TaskManager.ResetGeocachingComLiveAPINotAvailableCounter();
+                        for (int i = 0; i < gcData.Length; i++)
+                        {
+                            var gc = gcData[i];
+                            if (gc != null && (gc.CountryID == 4 || gc.CountryID == 8 || gc.CountryID == 141 || gc.StateID == 143 || gc.StateID == 139 || gc.StateID == 144))
+                            {
+                                DataSupport.Instance.AddGeocache(gc);
+
+                                //if scheduled, update logs too
+                                if (isScheduledCaches[i])
+                                {
+                                    TaskUpdateLogs.AddScheduledWaypoint(gc.Code);
+                                    TaskGeocacheImages.AddScheduledWaypoint(gc.Code);
+                                }
+
+                                _wpCount++;
+                                if (isScheduledCaches[i])
+                                {
+                                    _scheduledCount++;
+                                }
+
+                                Details = string.Format("C:{0} T:{1} S:{2}", gc.Code, _wpCount, _scheduledCount);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        TaskManager.IncrementGeocachingComLiveAPINotAvailableCounter();
+                    }
+                }
                 ServiceInfo.ErrorInLastRun = false;
             }
             catch(Exception e)
             {
                 ServiceInfo.ErrorInLastRun = true;
-                Details = string.Format("{0} - {1}", activeCode, e.Message);
+                Details = string.Format("{0}/{1} - {2}", activeCodes[0], activeCodes[1], e.Message);
             }
         }
     }

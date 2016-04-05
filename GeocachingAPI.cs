@@ -242,13 +242,13 @@ namespace TaskScheduler
             return result;
         }
 
-        public static Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache GetGeocache(string token, string wp)
+        public static Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache[] GetGeocaches(string token, string[] wp)
         {
-            return GetGeocache(token, wp, false);
+            return GetGeocaches(token, wp, false);
         }
-        public static Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache GetGeocache(string token, string wp, bool isLite)
+        public static Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache[] GetGeocaches(string token, string[] wp, bool isLite)
         {
-            Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache result = null;
+            Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache[] result = null;
 
             LiveClient lc = GetLiveClient();
             try
@@ -256,8 +256,8 @@ namespace TaskScheduler
                 SearchForGeocachesRequest sr = new SearchForGeocachesRequest();
                 sr.AccessToken = token;
                 sr.CacheCode = new Tucson.Geocaching.WCF.API.Geocaching1.Types.CacheCodeFilter();
-                sr.CacheCode.CacheCodes = new string[] { wp };
-                sr.MaxPerPage = 1;
+                sr.CacheCode.CacheCodes = wp;
+                sr.MaxPerPage = wp.Length;
                 sr.IsLite = isLite;
                 //sr.StartIndex = 0;
                 sr.GeocacheLogCount = 0;
@@ -266,10 +266,7 @@ namespace TaskScheduler
                 GetGeocacheDataResponse resp = lc.SearchForGeocaches(sr);
                 if (resp.Status.StatusCode == 0)
                 {
-                    if (resp.Geocaches.Count() > 0)
-                    {
-                        result = resp.Geocaches[0];
-                    }
+                    result = resp.Geocaches;
                 }
                 if (resp.CacheLimits != null)
                 {
