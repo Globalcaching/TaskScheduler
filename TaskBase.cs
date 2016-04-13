@@ -36,7 +36,7 @@ namespace TaskScheduler
             }
         }
 
-        private int _checkInterval;
+        protected int _checkInterval;
         private Thread _cfThread;
         private AutoResetEvent[] _cfTriggers = new AutoResetEvent[2];
         private struct Triggers
@@ -134,6 +134,19 @@ namespace TaskScheduler
 
         protected virtual void Stop()
         {
+        }
+
+        protected void PushDetails()
+        {
+            lock (this)
+            {
+                ServiceInfo.LastRun = DateTime.Now;
+                ServiceInfo.InfoMessage = _details;
+                using (var db = TaskManager.TaskSchedulerDatabase)
+                {
+                    db.Save(ServiceInfo);
+                }
+            }
         }
 
         protected void ServiceThreadMethod()
