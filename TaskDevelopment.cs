@@ -26,6 +26,7 @@ namespace TaskScheduler
                 //addMacroDataTables();
                 //updatePublisheddate();
                 //clearQueue();
+                //updatePublisheddate2();
             }
             catch (Exception e)
             {
@@ -104,5 +105,28 @@ namespace TaskScheduler
                 }
             }
         }
+
+        private void updatePublisheddate2()
+        {
+            using (var dbEU = GCEuDataSupport.Instance.GetGCEuDataDatabase())
+            using (var dbCom = GCComDataSupport.Instance.GetGCComDataDatabase())
+            {
+                List<long> gcEUCaches = dbEU.Fetch<long>("select GCEuGeocache.ID from GCEuGeocache inner join GCComData.dbo.GCComGeocache on GCEuGeocache.ID = GCComGeocache.ID where GCEuGeocache.PublishedAtDate = GCComGeocache.UTCPlaceDate and GCEuGeocache.PublishedAtDate>'2016-03-01'");
+                foreach (var gc in gcEUCaches)
+                {
+                    DateTime? publishedDate = null;
+                    var l = dbCom.FirstOrDefault<GCComGeocacheLog>("where GeocacheID=@0 and WptLogTypeId=24", gc);
+                    if (l != null)
+                    {
+                        publishedDate = l.VisitDate;
+                        dbEU.Execute("update GCEuGeocache set PublishedAtDate=@0 where ID=@1", publishedDate, gc);
+                    }
+
+                    _Count++;
+                    Details = _Count.ToString();
+                }
+            }
+        }
+
     }
 }

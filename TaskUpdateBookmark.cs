@@ -102,7 +102,6 @@ namespace TaskScheduler
 
                     if (!string.IsNullOrEmpty(token))
                     {
-                        var dt = DateTime.Now.AddMonths(-3);
                         var gcList = GeocachingAPI.GetBookmarkListByGuid(token, activeBM.ListGUID);
                         if (gcList != null)
                         {
