@@ -88,7 +88,7 @@ namespace TaskScheduler
                         for (int i = 0; i < gcData.Length; i++)
                         {
                             var gc = gcData[i];
-                            if (gc != null && (gc.CountryID == 4 || gc.CountryID == 8 || gc.CountryID == 141 || gc.StateID == 143 || gc.StateID == 139 || gc.StateID == 144 || gc.StateID == 142))
+                            if (gc != null && (gc.CountryID == 4 || gc.CountryID == 8 || gc.CountryID == 141 || gc.StateID == 143 || gc.StateID == 139 || gc.StateID == 144 || gc.StateID == 142 || gc.StateID == 145))
                             {
                                 DataSupport.Instance.AddGeocache(gc);
 
