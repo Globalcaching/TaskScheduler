@@ -67,22 +67,22 @@ namespace TaskScheduler
                 //first get scheduled
                 using (var db = new PetaPoco.Database(Manager.SchedulerConnectionString, "System.Data.SqlClient"))
                 {
-                    activeCode = GetScheduledWaypoint();
-                    if (!string.IsNullOrEmpty(activeCode))
+                    ScheduledWaypoint swp = db.FirstOrDefault<ScheduledWaypoint>("select top 1 * from ScheduledWaypoint where FullRefresh=0");
+                    if (swp != null)
                     {
+                        activeCode = swp.Code;
                         isScheduledCache = true;
+
+                        db.Execute("delete from ScheduledWaypoint where Code=@0", swp.Code);
                         GeocacheInfo gi = db.FirstOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where Code=@0", GCComDataSupport.GeocachingDatabaseName), activeCode);
                         activeId = gi.ID;
                     }
                     else
                     {
-                        ScheduledWaypoint swp = db.FirstOrDefault<ScheduledWaypoint>("select top 1 * from ScheduledWaypoint where FullRefresh=0");
-                        if (swp != null)
+                        activeCode = GetScheduledWaypoint();
+                        if (!string.IsNullOrEmpty(activeCode))
                         {
-                            activeCode = swp.Code;
                             isScheduledCache = true;
-
-                            db.Execute("delete from ScheduledWaypoint where Code=@0", swp.Code);
                             GeocacheInfo gi = db.FirstOrDefault<GeocacheInfo>(string.Format("select top 1 ID, Code from [{0}].[dbo].[GCComGeocache] where Code=@0", GCComDataSupport.GeocachingDatabaseName), activeCode);
                             activeId = gi.ID;
                         }
