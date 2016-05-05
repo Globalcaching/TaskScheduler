@@ -18,7 +18,7 @@ namespace TaskScheduler
 
         private GCCacheLogInfo _lastMostRecentLog = null;
         private long _logCount;
-        private string _geocachingComUrl = "http://www.geocaching.com";
+        private string _geocachingComUrl = "https://www.geocaching.com";
 
         public TaskMostRecentLogs(Manager taskManager) :
             base(taskManager, typeof(TaskMostRecentLogs), "Most recent logs", 0, 0, 20)
