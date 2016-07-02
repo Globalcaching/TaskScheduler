@@ -46,7 +46,7 @@ namespace TaskScheduler
         {
             using (var db = GCEuDataSupport.Instance.GetGCEuDataDatabase())
             {
-                db.CommandTimeout = 180;
+                db.CommandTimeout = 300;
 
                 int startYear = DateTime.Now.AddMonths(-2).Year;
                 var countries = new int[] { 141, 4, 8 };
