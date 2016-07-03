@@ -30,6 +30,10 @@ namespace TaskScheduler.Models
         public DateTime? MostRecentFoundDate { get; set; }
         public DateTime? MostRecentArchivedDate { get; set; }
         public int PMFoundCount { get; set; }
+        public DateTime? LastLogUpdateDate { get; set; }
+        public DateTime? AllLogUpdateDate { get; set; }
+        public DateTime? GeocacheUpdateDate { get; set; }
+        public DateTime? StatusUpdateDate { get; set; }
 
         public static GCEuGeocache From(Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache src)
         {
@@ -56,6 +60,10 @@ namespace TaskScheduler.Models
             result.FTFFoundCount = 0;
             result.MostRecentFoundDate = null;
             result.MostRecentArchivedDate = null;
+            result.LastLogUpdateDate = null;
+            result.AllLogUpdateDate = null;
+            result.GeocacheUpdateDate = null;
+            result.StatusUpdateDate = null;
             return result;
         }
     }

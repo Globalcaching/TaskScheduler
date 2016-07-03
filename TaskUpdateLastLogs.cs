@@ -129,6 +129,10 @@ namespace TaskScheduler
                         if (logs != null)
                         {
                             DataSupport.Instance.AddLogs(activeId, logs.ToArray(), false, dt);
+                            using (var db = new PetaPoco.Database(GCEuDataSupport.Instance.GCEuDataConnectionString, "System.Data.SqlClient"))
+                            {
+                                db.Execute("update GCEuGeocache set LastLogUpdateDate = @0 where ID=@1", DateTime.Now, activeId);
+                            }
                         }
                         else
                         {

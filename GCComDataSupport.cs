@@ -202,6 +202,8 @@ namespace TaskScheduler
                 {
                     AddGeocacheImages(db, gc.ID, gc.Images);
                 }
+
+                db.Execute(string.Format("update [{0}].[dbo].GCEuGeocache set GeocacheUpdateDate = @0 where ID=@1", GCEuDataSupport.GlobalcachingDatabaseName), DateTime.Now, gcData.ID);
             }
         }
 

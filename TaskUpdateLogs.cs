@@ -181,6 +181,10 @@ namespace TaskScheduler
                         if (tp.logs != null)
                         {
                             DataSupport.Instance.AddLogs(tp.gi.ID, tp.logs.ToArray(), true, tp.dt);
+                            using (var db = new PetaPoco.Database(GCEuDataSupport.Instance.GCEuDataConnectionString, "System.Data.SqlClient"))
+                            {
+                                db.Execute("update GCEuGeocache set AllLogUpdateDate = @0 where ID=@1", DateTime.Now, tp.gi.ID);
+                            }
                             UpdateDetails(tp.gi.Code, tp.isScheduledCache, "");
                             //tp.logs = null;
                         }

@@ -65,6 +65,7 @@ namespace TaskScheduler
                                 foreach (Tucson.Geocaching.WCF.API.Geocaching1.Types.GeocacheStatus stats in gstats)
                                 {
                                     db.Execute(string.Format("update [{0}].[dbo].[GCComGeocache] set Archived=@0, Available=@1 where Code=@2", GCComDataSupport.GeocachingDatabaseName), stats.Archived, stats.Available, stats.CacheCode);
+                                    db.Execute(string.Format("update [{0}].[dbo].GCEuGeocache set StatusUpdateDate = @0 where ID=@1", GCEuDataSupport.GlobalcachingDatabaseName), DateTime.Now, Helper.GetCacheIDFromCacheCode(stats.CacheCode));
                                 }
                                 _counter++;
                                 Details = string.Format("{0}, total counter={1}, this batch={2}, lastWP={3}", DateTime.Now.ToString(), _counter.ToString(), gstats.Length, lastId);
