@@ -20,7 +20,27 @@ namespace TaskScheduler
             {
                 using (System.Net.WebClient wc = new System.Net.WebClient())
                 {
-                    string webPage = wc.DownloadString("http://www.globalcaching.eu");
+                    string webPage = wc.DownloadString("https://www.4geocaching.eu");
+                }
+            }
+            catch
+            {
+            }
+            try
+            {
+                using (System.Net.WebClient wc = new System.Net.WebClient())
+                {
+                    string webPage = wc.DownloadString("https://shop.4geocaching.eu");
+                }
+            }
+            catch
+            {
+            }
+            try
+            {
+                using (System.Net.WebClient wc = new System.Net.WebClient())
+                {
+                    string webPage = wc.DownloadString("https://forum.4geocaching.eu/forum");
                 }
             }
             catch
