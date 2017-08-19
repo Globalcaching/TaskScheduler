@@ -91,18 +91,26 @@ namespace TaskScheduler
                             if (gc != null && (gc.CountryID == 4 || gc.CountryID == 8 || gc.CountryID == 141 || gc.StateID == 143 || gc.StateID == 139 || gc.StateID == 144 || gc.StateID == 142 || gc.StateID == 145))
                             {
                                 DataSupport.Instance.AddGeocache(gc);
-
-                                //if scheduled, update logs too
-                                if (isScheduledCaches[i])
-                                {
-                                    TaskUpdateLogs.AddScheduledWaypoint(gc.Code);
-                                    TaskGeocacheImages.AddScheduledWaypoint(gc.Code);
-                                }
-
                                 _wpCount++;
-                                if (isScheduledCaches[i])
+
+                                var index = 0;
+                                while (index < activeCodes.Length && string.Compare(activeCodes[index], gc.Code, true) != 0)
                                 {
-                                    _scheduledCount++;
+                                    index++;
+                                }
+                                if (index < activeCodes.Length)
+                                {
+                                    //if scheduled, update logs too
+                                    if (isScheduledCaches[index])
+                                    {
+                                        TaskUpdateLogs.AddScheduledWaypoint(gc.Code);
+                                        TaskGeocacheImages.AddScheduledWaypoint(gc.Code);
+                                    }
+
+                                    if (isScheduledCaches[index])
+                                    {
+                                        _scheduledCount++;
+                                    }
                                 }
 
                                 Details = string.Format("C:{0} T:{1} S:{2}", gc.Code, _wpCount, _scheduledCount);
