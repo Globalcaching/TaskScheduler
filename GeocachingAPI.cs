@@ -21,7 +21,7 @@ namespace TaskScheduler
         {
             using (var db = new PetaPoco.Database(Manager.SchedulerConnectionString, "System.Data.SqlClient"))
             {
-                GCComPMAccounts = db.Fetch<GcComAccounts>("");
+                GCComPMAccounts = db.Fetch<GcComAccounts>("where Enabled=1");
             }
         }
 
@@ -241,6 +241,54 @@ namespace TaskScheduler
             }
             return result;
         }
+
+        public static List<Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache> GetNewGeocaches(string token)
+        {
+            var result = new List<Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache>();
+
+            LiveClient lc = GetLiveClient();
+            try
+            {
+                SearchForGeocachesRequest sr = new SearchForGeocachesRequest();
+                sr.AccessToken = token;
+                sr.MaxPerPage = 50;
+                sr.IsLite = true;
+                sr.Countries = new Tucson.Geocaching.WCF.API.Geocaching1.Types.CountryFilter();
+                sr.Countries.CountryIds = new int[] { 4, 8, 141 };
+                sr.CachePublishedDate = new Tucson.Geocaching.WCF.API.Geocaching1.Types.CachePublishedDateFilter();
+                sr.CachePublishedDate.Range = new DateRange();
+                sr.CachePublishedDate.Range.StartDate = DateTime.Now.AddHours(-24).ToUniversalTime();
+                //sr.StartIndex = 0;
+                sr.GeocacheLogCount = 0;
+                sr.TrackableLogCount = 0;
+                sr.IsSummaryOnly = true;
+
+                GetGeocacheDataResponse resp = lc.SearchForGeocaches(sr);
+                while (resp.Status.StatusCode == 0 && resp.Geocaches != null && resp.Geocaches.Length>0)
+                {
+                    result.AddRange(resp.Geocaches);
+
+                    System.Threading.Thread.Sleep(4000);
+                    var mr = new GetMoreGeocachesRequest();
+                    mr.AccessToken = token;
+                    mr.GeocacheLogCount = 0;
+                    mr.IsLite = true;
+                    mr.IsSummaryOnly = true;
+                    mr.MaxPerPage = 50;
+                    mr.GeocacheLogCount = 0;
+                    mr.TrackableLogCount = 0;
+                    mr.StartIndex = result.Count;
+
+                    resp = lc.GetMoreGeocaches(mr);
+                }
+            }
+            catch
+            {
+            }
+            lc.Close();
+            return result;
+        }
+
 
         public static Tucson.Geocaching.WCF.API.Geocaching1.Types.Geocache[] GetGeocaches(string token, string[] wp)
         {
